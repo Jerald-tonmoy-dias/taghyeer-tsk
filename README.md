@@ -13,6 +13,7 @@ Login with a phone number and name, search people, start conversations, and mess
 
 ## Docs
 
+- **[Developer guide](docs/developer-guide.md)** — start here to run the app and find your way around
 - [API reference](docs/api-doc.md)
 - [System design](docs/system-design.md)
 - [Postman collection](docs/Chat-API.postman_collection.json)
