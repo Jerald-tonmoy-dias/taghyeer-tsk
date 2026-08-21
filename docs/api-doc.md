@@ -286,6 +286,8 @@ GET /users/search?q={query}
 
 Requires auth. Search by name or phone.
 
+Matching is **not flexible**. The query must match the stored name or phone as written — it is case-sensitive and does not do fuzzy or partial-word search. `q=ada` and `q=Ada` are different queries and can return different results.
+
 **Query**
 
 | Name | Type | Required |
@@ -307,6 +309,8 @@ Requires auth. Search by name or phone.
 No matches → `[]`.
 
 > **Implement this in the UI:** do not call search with an empty `q`. `?q=` and omitting `q` both return `200` with a list of 50 users.
+>
+> Type the name the way it was registered (for example `Ada`, not `ada`) — the API does not fold case or match substrings.
 
 ---
 

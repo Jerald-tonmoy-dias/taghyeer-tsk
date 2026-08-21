@@ -5,6 +5,7 @@ import type { User } from "@/lib/types";
 
 /**
  * Search people by name or phone. Empty `q` does not call the API.
+ * The live API is case-sensitive and exact: `ada` and `Ada` can return different lists.
  * @param q - Search query
  * @returns Promise<User[]>
  */

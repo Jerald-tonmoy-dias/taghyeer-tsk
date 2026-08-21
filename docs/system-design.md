@@ -322,7 +322,7 @@ Landing does **not** mount Socket.io. Chat code-splits (`dynamic` import of `Cha
 ### Runtime
 
 - Memo bubbles and rows.
-- Debounce search 300ms; min 1 character.
+- Debounce search 300ms; min 1 character. The API match is exact and case-sensitive (`ada` ≠ `Ada`); we pass `q` through as typed.
 - Message list: CSS column-reverse **or** explicit reverse + `overflow-anchor`; **do not** `scrollTop = scrollHeight` on every render.
 - **Stick-to-bottom algorithm:** `isNearBottom` (threshold ~80px). New message + near bottom → scroll. User scrolled up → no forced scroll. Composer send → force scroll (user intent).
 - Pagination: IntersectionObserver on the **top** sentinel when `hasMore`.
