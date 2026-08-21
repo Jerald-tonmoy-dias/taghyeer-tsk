@@ -90,7 +90,7 @@ type Message = {
   conversationId: ConversationId;
   senderId: UserId;
   text: string;
-  createdAt: number;   // always ms epoch in the client
+  createdAt: number;   // milliseconds since 1 Jan 1970
   status?: "sending" | "sent" | "failed"; // client-only
 };
 
@@ -183,12 +183,13 @@ Map: `NO_TOKEN` / `INVALID_TOKEN` → logout. `FORBIDDEN` / `NOT_FOUND` / `VALID
 
 ```
 src/lib/api/client.ts     // fetch + Bearer + parse errors
+src/lib/api/payloads.ts   // JSON as the server sends it
 src/lib/api/auth.ts
 src/lib/api/users.ts
 src/lib/api/conversations.ts
 src/lib/api/messages.ts
 src/lib/socket.ts         // singleton, token handshake
-src/lib/mappers.ts        // _id → id, createdAt → number
+src/lib/mappers.ts        // _id → id, createdAt → milliseconds
 ```
 
 ---
@@ -235,6 +236,7 @@ src/
 └── lib/
     ├── api/
     │   ├── client.ts
+    │   ├── payloads.ts               # JSON as the server sends it
     │   ├── auth.ts
     │   ├── users.ts
     │   ├── conversations.ts
@@ -252,6 +254,7 @@ src/
 - Containers (pages / `ChatShell`) fetch and map.
 - `MessageBubble`, `ConversationRow` are presentational + `React.memo`.
 - Keep pages thin; logic lives under `features/`.
+- Functions use a short JSDoc: summary, `@param`, `@returns`.
 
 ---
 
@@ -410,8 +413,11 @@ Landing (`/`) is static. Login stores a JWT. `/app` is a client app: TanStack Qu
 | CSR chat, SSG landing | Sockets + SEO split | Chat TTI after JS |
 | `localStorage` JWT | API is Bearer-only | XSS; document in README |
 | shadcn/ui for app chrome | Accessible dialogs, forms, sheets without a heavy kit | Keep landing + bubbles custom |
+| No Zod | Types + mappers already cover the API; form rules are a few `trim()` checks | No runtime schema on responses |
 | Client empty-message guard | API stores `""` | Must not “trust the backend” |
 | Skip group admin UI in v1 if time-tight | Chat panel ships first | Still **create** group + chat |
+
+Zod would not remove the mappers. REST and UI shapes differ (`_id` vs `id`, ISO date vs millisecond timestamp, empty `lastMessage: {}`), so a schema would still need the same transforms, plus more code than `type User = { … }` and a `trim()` on login/search/send. TypeScript is the contract; the live API is stable enough that parsing every payload at runtime is extra upkeep, not safety.
 
 **Deliberately not solved:** typing, receipts, offline queue, signed-cookie auth, `before` cursor correctness, newly-added member socket (not probed).
 
