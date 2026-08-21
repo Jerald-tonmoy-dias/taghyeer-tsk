@@ -209,10 +209,12 @@ POST /auth/login
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `phone` | string | yes | |
+| `phone` | string | yes | Required, but **not validated as a phone number**. Any string is stored as the account key. |
 | `name` | string | yes | |
 
 Do **not** send `_id`, `createdAt`, or `token`. The database assigns `_id` and `createdAt`; the server returns `token`.
+
+The client must check the phone format before login. `"abc"`, `"123"`, and `"+15551234567"` all succeed on this endpoint if `phone` is present.
 
 ```json
 { "phone": "+15551234567", "name": "Ada Lovelace" }

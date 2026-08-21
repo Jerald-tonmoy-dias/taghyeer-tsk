@@ -133,6 +133,7 @@ erDiagram
 - `isMine` = `message.senderId === session.user.id`
 - Thread title: direct → `participant.name`; group → `name`
 - Empty-send: `text.trim().length === 0`
+- Phone: international format (`+` and 8–15 digits). The API accepts any string.
 - Group create valid: `name.trim()` and `participantIds.length >= 2`
 
 **Session**
