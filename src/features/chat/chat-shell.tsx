@@ -23,7 +23,7 @@ export function ChatShell() {
           isThreadOpen ? "hidden md:block" : "block",
         )}
       >
-        <ChatSidebar />
+        <ChatSidebar selectedId={conversationId} />
       </aside>
       <section
         className={cn(

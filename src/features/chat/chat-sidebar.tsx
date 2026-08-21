@@ -1,16 +1,21 @@
 "use client";
 
-import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/features/auth/auth-provider";
+import { ConversationList } from "@/features/inbox/conversation-list";
+
+type ChatSidebarProps = {
+  selectedId: string | null;
+};
 
 /**
- * Left pane: session chrome and a slot for the inbox (next ticket).
+ * Left pane: session chrome and the inbox.
+ * @param props.selectedId - Open conversation from `?c=`
  * @returns JSX.Element
  */
-export function ChatSidebar() {
+export function ChatSidebar({ selectedId }: ChatSidebarProps) {
   const { user, logout } = useAuth();
 
   return (
@@ -31,14 +36,7 @@ export function ChatSidebar() {
         </Button>
       </header>
       <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col gap-3 px-4 py-6">
-          <p className="text-sm text-muted-foreground">
-            Conversations will show up here.
-          </p>
-          <Button variant="outline" size="sm" className="w-fit" asChild>
-            <Link href="/app?c=preview">Preview thread layout</Link>
-          </Button>
-        </div>
+        <ConversationList selectedId={selectedId} />
       </ScrollArea>
     </div>
   );
