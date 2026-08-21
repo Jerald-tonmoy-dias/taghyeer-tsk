@@ -214,7 +214,7 @@ POST /auth/login
 
 Do **not** send `_id`, `createdAt`, or `token`. The database assigns `_id` and `createdAt`; the server returns `token`.
 
-The client must check the phone format before login. `"abc"`, `"123"`, and `"+15551234567"` all succeed on this endpoint if `phone` is present.
+The client must check the phone before login: digits only (optional `+`) and at least 10 digits. `"abc"` is rejected in the UI; the API would still accept it.
 
 ```json
 { "phone": "+15551234567", "name": "Ada Lovelace" }
