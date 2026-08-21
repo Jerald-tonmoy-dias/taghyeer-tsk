@@ -58,7 +58,11 @@ export function LoginForm() {
       router.replace("/app");
     } catch (error) {
       setFormError(
-        isApiError(error) ? error.message : "Could not log in. Try again.",
+        isApiError(error)
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Could not log in. Try again.",
       );
     } finally {
       setPending(false);

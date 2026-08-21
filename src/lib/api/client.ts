@@ -8,15 +8,14 @@ type ApiRequestOptions = {
   query?: Record<string, string | number | undefined>;
 };
 
+const DEFAULT_API_URL = "https://frontend-task-chatapp.onrender.com/api";
+
 /**
  * Resolve the REST base URL from env (no trailing slash).
  * @returns string
  */
 function getBaseUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!baseUrl) {
-    throw new Error("NEXT_PUBLIC_API_URL is not set");
-  }
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL;
   return baseUrl.replace(/\/$/, "");
 }
 
