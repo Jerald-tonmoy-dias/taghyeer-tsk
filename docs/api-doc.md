@@ -641,7 +641,7 @@ Requires auth. Works for 1:1 and groups. You must be a participant.
 
 You can also send over the socket (`message:send`). Other participants get `message:new`. The sender does **not** get `message:new` — use this REST (or socket ack) response to update the sender’s UI.
 
-> **Empty messages:** the assignment says they must not be sendable. The API accepts `""` and `"   "` with `200` and stores them. Disable send in the client when `text.trim()` is empty.
+> **Empty messages:** the product must not send blank bubbles. The API accepts `""` and `"   "` with `200` and stores them. Disable send in the client when `text.trim()` is empty.
 
 ---
 

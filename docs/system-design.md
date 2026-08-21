@@ -1,6 +1,6 @@
 # Frontend System Design — Taghyeer Chat
 
-Follows `frontend-system-design-guide.md`. Written **before** implementation. The backend is a given REST + Socket.io API we do not control.
+Written **before** implementation. The app consumes a REST + Socket.io backend we do not control.
 
 ---
 
@@ -10,12 +10,12 @@ Follows `frontend-system-design-guide.md`. Written **before** implementation. Th
 
 | Question | Answer for this product |
 |---|---|
-| Who | A candidate demo / small-group chat user, not a million-user consumer app |
-| Device | Desktop + phone (assignment: responsive). Chat is two-pane on desktop, one pane on mobile |
+| Who | Small-group chat users in the browser, not a million-user consumer app |
+| Device | Desktop + phone. Chat is two-pane on desktop, one pane on mobile |
 | Network | Unknown; API is on Render (cold starts). Design for slow first request, not fiber-only |
 | Frequency | Session-based: login, pick a thread, send a few messages. Not a 24/7 presence product |
-| Scale | Tens of conversations, hundreds of messages per thread in the demo — not 10k-row virtualization as a must |
-| Greenfield | Yes. Next.js + React as required. We consume `https://frontend-task-chatapp.onrender.com` |
+| Scale | Tens of conversations, hundreds of messages per thread — not 10k-row virtualization as a must |
+| Greenfield | Yes. Next.js + React. We consume `https://frontend-task-chatapp.onrender.com` |
 
 ### The 5 questions
 
@@ -58,13 +58,13 @@ Follows `frontend-system-design-guide.md`. Written **before** implementation. Th
 - Group rename / add / leave (API exists; polish after core chat)
 - Normalize REST `_id` vs socket `id` + ISO vs numeric `createdAt`
 
-**Could** (bonus only if core is solid)
+**Could** (after core is solid)
 
 - “New messages” pill when not stuck to bottom (original, product-specific)
 - Failed-send retry on a single bubble
 - `conversation:updated` live header/inbox
 
-**Won’t (this 24h)**
+**Won’t (MVP)**
 
 - Offline-first sync, read receipts, typing indicators, file/image messages, push notifications, i18n, dark-mode-as-a-feature, virtualization of 10k messages, E2E suite, feature flags
 
@@ -120,39 +120,13 @@ type Conversation = DirectConversation | GroupConversation;
 
 ```mermaid
 erDiagram
-  USER {
-    string id
-    string name
-    string phone
-  }
-  CONVERSATION {
-    string id
-    string type
-    string updatedAt
-  }
-  DIRECT {
-    string participant
-  }
-  GROUP {
-    string name
-    string createdBy
-  }
-  MESSAGE {
-    string id
-    string text
-    number createdAt
-  }
-
-  USER ||--o{ CONVERSATION : "member of"
-  USER ||--o{ GROUP : "admin of"
+  USER ||--o{ CONVERSATION : member
   USER ||--o{ MESSAGE : sends
-  CONVERSATION ||--|| DIRECT : "type = direct"
-  CONVERSATION ||--|| GROUP : "type = group"
   CONVERSATION ||--o{ MESSAGE : contains
-  GROUP }o--o{ USER : participants
 ```
 
-Direct chats store the other person as `participant`. Groups store `participants[]` and `admins[]` (admins are a subset of members).
+- Direct: `type: "direct"` — other person is `participant`
+- Group: `type: "group"` — `participants[]`, `admins[]` (admins ⊂ members)
 
 **Derive on the client (API does not give it)**
 
@@ -223,36 +197,53 @@ src/lib/mappers.ts        // _id → id, createdAt → number
 
 Two products, one app: **marketing** (`/`) and **chat** (`/login`, `/app`).
 
-```mermaid
-flowchart TB
-  subgraph Routes
-    R1["/  LandingPage"]
-    R2["/login"]
-    R3["/app"]
-  end
-
-  R1 --> Nav
-  R1 --> Hero
-  R1 --> ProductPreview
-  R1 --> Footer
-  Hero -->|CTA| R2
-
-  R2 --> LoginForm
-
-  R3 --> ChatShell
-  ChatShell --> Sidebar
-  ChatShell --> Thread
-  Sidebar --> SearchPeople
-  Sidebar --> NewGroup
-  Sidebar --> ConversationList
-  ConversationList --> ConversationRow
-  Thread --> ThreadHeader
-  Thread --> MessageList
-  Thread --> JumpToLatest
-  Thread --> Composer
-  Thread --> ConnectionStatus
-  MessageList --> MessageBubble
 ```
+src/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx                      # /  LandingPage
+│   ├── login/
+│   │   └── page.tsx                  # /login
+│   └── app/
+│       └── page.tsx                  # /app  ChatShell (client)
+│
+├── features/
+│   ├── landing/
+│   │   ├── Nav.tsx
+│   │   ├── Hero.tsx                  # CTA → /login
+│   │   ├── ProductPreview.tsx        # static mock, not live data
+│   │   └── Footer.tsx
+│   ├── auth/
+│   │   └── LoginForm.tsx
+│   ├── inbox/
+│   │   ├── SearchPeople.tsx
+│   │   ├── ConversationList.tsx
+│   │   └── ConversationRow.tsx       # presentational, memo
+│   ├── groups/
+│   │   └── NewGroup.tsx              # dialog
+│   └── thread/
+│       ├── ThreadHeader.tsx
+│       ├── MessageList.tsx
+│       ├── MessageBubble.tsx         # presentational, memo, isMine
+│       ├── JumpToLatest.tsx          # could-have
+│       ├── Composer.tsx
+│       └── ConnectionStatus.tsx
+│
+├── components/
+│   └── ui/                           # Button, Input, Skeleton, Empty, ErrorState
+│
+└── lib/
+    ├── api/
+    │   ├── client.ts
+    │   ├── auth.ts
+    │   ├── users.ts
+    │   ├── conversations.ts
+    │   └── messages.ts
+    ├── socket.ts
+    └── mappers.ts
+```
+
+`ChatShell` composes `Sidebar` (`SearchPeople`, `NewGroup`, `ConversationList`) and `Thread` (header, list, composer, connection status).
 
 **Mobile:** `ChatShell` shows either sidebar or thread (`?c=` present). Back clears the param.
 
@@ -260,24 +251,7 @@ flowchart TB
 
 - Containers (pages / `ChatShell`) fetch and map.
 - `MessageBubble`, `ConversationRow` are presentational + `React.memo`.
-- No 800-line pages: `features/auth`, `features/inbox`, `features/thread`, `features/groups`, `features/landing`.
-
-```
-src/
-  app/
-    page.tsx              // landing
-    login/page.tsx
-    app/page.tsx          // chat (client)
-    layout.tsx
-  features/
-    auth/
-    inbox/
-    thread/
-    groups/
-    landing/
-  components/ui/          // Button, Input, Skeleton, Empty, ErrorState
-  lib/
-```
+- Keep pages thin; logic lives under `features/`.
 
 ---
 
@@ -316,33 +290,6 @@ src/
 - If that thread is open and stuck-to-bottom → stay pinned; else increment “new” count.
 
 **Do not** put the message list in Zustand/Redux. Query cache is the server-state store.
-
-```mermaid
-flowchart LR
-  subgraph ClientState
-    Auth["Auth context + localStorage"]
-    UI["useState: composer, dialogs, stick-to-bottom"]
-    URL["URL: ?c=conversationId"]
-  end
-  subgraph ServerState["TanStack Query"]
-    Q1["session"]
-    Q2["conversations"]
-    Q3["messages, id"]
-    Q4["users search"]
-  end
-  REST[REST API]
-  Sock[Socket.io]
-
-  Auth -->|Bearer| REST
-  Auth -->|handshake| Sock
-  Q1 --> REST
-  Q2 --> REST
-  Q3 --> REST
-  Q4 --> REST
-  Sock -->|message:new| Q3
-  Sock -->|conversation:updated| Q2
-  URL --> Q3
-```
 
 ---
 
@@ -383,7 +330,7 @@ Landing does **not** mount Socket.io. Chat code-splits (`dynamic` import of `Cha
 - Optimistic send is optional; REST is fast enough — prefer wait + disable composer vs fake bubbles if we cut scope.
 - Socket badge: Connecting / Live / Offline.
 
-### Budgets (take-home, not CI-enforced)
+### Budgets (targets, not CI-enforced)
 
 - Landing JS modest; chat chunk allowed to be larger.
 - LCP landing < 2.5s on a decent connection as a target, not a gate.
@@ -402,7 +349,7 @@ Landing does **not** mount Socket.io. Chat code-splits (`dynamic` import of `Cha
 **Security**
 
 - No `dangerouslySetInnerHTML` for message text (text nodes only).
-- Token only in memory + `localStorage` (XSS risk accepted for take-home; httpOnly cookie not available without our BE).
+- Token only in memory + `localStorage` (XSS risk accepted for MVP; httpOnly cookie is not available without a backend change).
 - Don’t log JWTs.
 - Client validation + still handle API errors.
 
@@ -422,77 +369,35 @@ Landing does **not** mount Socket.io. Chat code-splits (`dynamic` import of `Cha
 
 **Observability**
 
-- Won’t ship Sentry in 24h. `console.error` in the API client is enough. Call out as v2.
+- Won’t ship Sentry in MVP. `console.error` in the API client is enough. Call out as v2.
 
 ---
 
 ## 9. Thread UX (highest polish)
 
-Assignment focus: list, send, realtime, auto-scroll.
+The chat panel is the core product surface: list, send, realtime, auto-scroll.
 
-```mermaid
-sequenceDiagram
-  actor U as User
-  participant T as Thread
-  participant Q as Query cache
-  participant API as REST
-  participant S as Socket
+**Open a thread:** fetch `limit=30`, reverse to oldest→newest, scroll to bottom, set `stuckToBottom = true`.
 
-  U->>T: open conversation
-  T->>API: GET .../messages?limit=30
-  API-->>Q: messages newest-first
-  Q-->>T: reverse, scroll to bottom, stuck=true
+**Send:** if `text.trim()` is empty, do nothing. Otherwise `POST /messages`, append the REST response, scroll to bottom.
 
-  U->>T: send "Hello"
-  T->>T: reject if trim empty
-  T->>API: POST /messages
-  API-->>T: message _id + ISO date
-  T->>Q: append, force scroll
+**Incoming (`message:new`):** ignore if you sent it (already on screen). Otherwise append. If `stuckToBottom`, scroll; if the user is reading older messages, do **not** pull them down — optionally bump a “new messages” count.
 
-  S-->>Q: message:new from other user
-  alt stuck to bottom
-    Q-->>T: append + scroll
-  else reading history
-    Q-->>T: append + newCount++
-  end
-```
+**Scroll:**
 
-```mermaid
-stateDiagram-v2
-  [*] --> StuckToBottom
-  StuckToBottom --> ReadingUp: scroll up past ~80px
-  ReadingUp --> StuckToBottom: scroll near bottom or send message
-  ReadingUp --> ReadingUp: message:new increments badge
-  StuckToBottom --> StuckToBottom: message:new auto-scrolls
-```
+| User is… | New incoming message |
+|---|---|
+| Near the bottom (~80px) | Auto-scroll to latest |
+| Scrolled up reading history | Stay put |
+| Sending a message | Always scroll to latest (they meant to) |
+
+Load older pages when the top of the list is visible and `hasMore` is true; prepend without jumping the scroll position.
 
 ---
 
-## 10. High-level flow
+## 10. How the pieces connect
 
-```mermaid
-flowchart LR
-  subgraph Public
-    L[Landing /]
-    Login["/login"]
-  end
-  subgraph App["/app CSR"]
-    Q[TanStack Query]
-    S[Socket.io]
-    UI[ChatShell]
-  end
-  API[REST /api]
-  SO[Socket origin]
-
-  L -->|CTA| Login
-  Login -->|POST /auth/login| API
-  Login -->|token| App
-  UI --> Q
-  Q --> API
-  S --> SO
-  SO -->|message:new| Q
-  SO -->|conversation:updated| Q
-```
+Landing (`/`) is static. Login stores a JWT. `/app` is a client app: TanStack Query talks to REST; Socket.io only pushes `message:new` / `conversation:updated` into that same cache. The sender never waits on the socket — their bubble comes from the REST response.
 
 ---
 
@@ -503,10 +408,10 @@ flowchart LR
 | REST send + socket receive | Matches probes (no `message:new` on sender). One write path | Two transports to wire |
 | TanStack Query | Loading/error/cache without Redux | Extra dependency |
 | CSR chat, SSG landing | Sockets + SEO split | Chat TTI after JS |
-| `localStorage` JWT | API is Bearer-only | XSS; note in Part 3 |
-| No UI kit | Faster unique landing (Part 2) | Build primitives |
+| `localStorage` JWT | API is Bearer-only | XSS; document in README |
+| No UI kit | Faster unique landing | Build primitives |
 | Client empty-message guard | API stores `""` | Must not “trust the backend” |
-| Skip group admin UI in v1 if time-tight | Chat panel is the grade | Still **create** group + chat |
+| Skip group admin UI in v1 if time-tight | Chat panel ships first | Still **create** group + chat |
 
 **Deliberately not solved:** typing, receipts, offline queue, signed-cookie auth, `before` cursor correctness, newly-added member socket (not probed).
 
@@ -522,6 +427,6 @@ flowchart LR
 6. Group create  
 7. States polish  
 8. Landing  
-9. README / Part 3 (include this design’s trade-offs)
+9. README (setup, stack, trade-offs)
 
-If time slips: cut admin settings and landing motion first. **Never cut** thread + socket + scroll + demos.
+If time slips: cut admin settings and landing motion first. **Never cut** thread + socket + scroll.

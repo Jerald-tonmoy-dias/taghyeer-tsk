@@ -48,5 +48,7 @@ Thumbs.db
 # Optional: local probe leftovers
 docs/api-probe-results.json
 
-# Assignment brief — keep local only
-Senior_Frontend_Engineer_Task_Instructions.pdf.md
+# Local-only notes
+note.md
+PLAN.md
+*.pdf.md
