@@ -15,7 +15,7 @@ type FieldErrors = {
 };
 
 /**
- * Require a valid international phone and a non-empty name.
+ * Require a phone number (digits, at least 10) and a non-empty name.
  * @param phone - Phone field
  * @param name - Name field
  * @returns FieldErrors
@@ -25,7 +25,7 @@ function validateLogin(phone: string, name: string): FieldErrors {
   if (!phone.trim()) {
     errors.phone = "Enter your phone number";
   } else if (!isValidPhone(phone)) {
-    errors.phone = "Enter a valid number with country code, e.g. +15551234567";
+    errors.phone = "Enter a phone number with at least 10 digits";
   }
   if (!name.trim()) {
     errors.name = "Enter your name";
@@ -95,7 +95,7 @@ export function LoginForm() {
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">
-            International format with country code, e.g. +15551234567
+            At least 10 digits. Country code is optional.
           </p>
         )}
       </div>

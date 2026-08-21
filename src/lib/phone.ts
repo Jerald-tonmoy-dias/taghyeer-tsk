@@ -1,5 +1,4 @@
-/** International phone: `+` then 8–15 digits, first digit 1–9 (E.164). */
-const PHONE_PATTERN = /^\+[1-9]\d{7,14}$/;
+const MIN_PHONE_DIGITS = 10;
 
 /**
  * Strip spaces, dashes, dots, and parentheses from a phone field.
@@ -11,11 +10,25 @@ export function normalizePhone(phone: string): string {
 }
 
 /**
- * Whether the value is a valid international phone number.
- * The live API does not check this — it stores any string.
+ * Digits only, ignoring an optional leading `+`.
+ * @param phone - Raw or normalized input
+ * @returns string
+ */
+export function phoneDigits(phone: string): string {
+  const normalized = normalizePhone(phone);
+  const withoutPlus = normalized.startsWith("+")
+    ? normalized.slice(1)
+    : normalized;
+  return withoutPlus;
+}
+
+/**
+ * True when the value is digits (optional `+`) and at least 10 digits long.
+ * The live API does not check format — it stores any string.
  * @param phone - Raw or normalized input
  * @returns boolean
  */
 export function isValidPhone(phone: string): boolean {
-  return PHONE_PATTERN.test(normalizePhone(phone));
+  const digits = phoneDigits(phone);
+  return /^\d+$/.test(digits) && digits.length >= MIN_PHONE_DIGITS;
 }
