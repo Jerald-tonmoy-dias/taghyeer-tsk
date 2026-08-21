@@ -16,6 +16,21 @@ Login with a phone number and name, search people, start conversations, and mess
 - [System design](docs/system-design.md)
 - [Postman collection](docs/Chat-API.postman_collection.json)
 
+## Setup
+
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | REST base (`…/api`) |
+| `NEXT_PUBLIC_SOCKET_URL` | Socket.io origin (host root, not `/api`) |
+
+Open [http://localhost:3000](http://localhost:3000). Routes: `/` landing, `/login`, `/app` chat.
+
 ## Status
 
 Core chat is being built. The API contract is documented; the app, landing page, and deploy follow.
