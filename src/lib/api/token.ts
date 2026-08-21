@@ -1,5 +1,29 @@
 const TOKEN_KEY = "taghyeer.token";
 
+const listeners = new Set<() => void>();
+
+/**
+ * Notify subscribers after the stored JWT changes.
+ * @returns void
+ */
+function notifyTokenListeners(): void {
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
+/**
+ * Subscribe to JWT changes in this tab.
+ * @param listener - Called after set/clear
+ * @returns () => void — unsubscribe
+ */
+export function subscribeToken(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 /**
  * Read the JWT from `localStorage`.
  * @returns string | null
@@ -21,6 +45,7 @@ export function setToken(token: string): void {
     return;
   }
   window.localStorage.setItem(TOKEN_KEY, token);
+  notifyTokenListeners();
 }
 
 /**
@@ -32,4 +57,5 @@ export function clearToken(): void {
     return;
   }
   window.localStorage.removeItem(TOKEN_KEY);
+  notifyTokenListeners();
 }

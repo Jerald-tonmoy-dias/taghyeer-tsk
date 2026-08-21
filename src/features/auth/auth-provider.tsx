@@ -4,15 +4,19 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMe, login as loginRequest } from "@/lib/api/auth";
 import { isApiError } from "@/lib/api/error";
-import { clearToken, getToken, setToken } from "@/lib/api/token";
+import {
+  clearToken,
+  getToken,
+  setToken,
+  subscribeToken,
+} from "@/lib/api/token";
 import type { User } from "@/lib/types";
 
 export type AuthStatus = "loading" | "authenticated" | "anonymous" | "error";
@@ -28,39 +32,52 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
+ * True after hydration so we do not read `localStorage` during SSR.
+ * @returns boolean
+ */
+function useIsClient(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
+/**
+ * Load the current user. Clears the JWT when the API says it is invalid.
+ * @returns Promise<User>
+ */
+async function restoreSession(): Promise<User> {
+  try {
+    return await getMe();
+  } catch (error) {
+    if (isApiError(error) && error.isAuthError) {
+      clearToken();
+    }
+    throw error;
+  }
+}
+
+/**
  * Load and persist the signed-in user. Restores via `/auth/me` when a token exists.
  * @param props.children - Tree that can call `useAuth`
  * @returns ReactNode
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [hasCheckedToken, setHasCheckedToken] = useState(false);
-  const [hasToken, setHasToken] = useState(false);
-
-  useEffect(() => {
-    setHasToken(Boolean(getToken()));
-    setHasCheckedToken(true);
-  }, []);
+  const isClient = useIsClient();
+  const token = useSyncExternalStore(subscribeToken, getToken, () => null);
+  const hasToken = isClient && Boolean(token);
 
   const sessionQuery = useQuery({
     queryKey: ["session"],
-    queryFn: getMe,
-    enabled: hasCheckedToken && hasToken,
+    queryFn: restoreSession,
+    enabled: hasToken,
     retry: false,
     staleTime: Infinity,
   });
 
-  useEffect(() => {
-    if (!sessionQuery.isError || !isApiError(sessionQuery.error)) {
-      return;
-    }
-    if (sessionQuery.error.isAuthError) {
-      clearToken();
-      setHasToken(false);
-    }
-  }, [sessionQuery.error, sessionQuery.isError]);
-
-  const status: AuthStatus = !hasCheckedToken
+  const status: AuthStatus = !isClient
     ? "loading"
     : !hasToken
       ? "anonymous"
@@ -78,7 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (input: { phone: string; name: string }) => {
       const session = await loginRequest(input);
       setToken(session.token);
-      setHasToken(true);
       queryClient.setQueryData(["session"], session.user);
     },
     [queryClient],
@@ -86,13 +102,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearToken();
-    setHasToken(false);
     queryClient.removeQueries({ queryKey: ["session"] });
   }, [queryClient]);
 
   const retryRestore = useCallback(() => {
-    void sessionQuery.refetch();
-  }, [sessionQuery]);
+    void queryClient.invalidateQueries({ queryKey: ["session"] });
+  }, [queryClient]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
