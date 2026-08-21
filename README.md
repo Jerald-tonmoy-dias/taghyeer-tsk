@@ -25,6 +25,12 @@ npm install
 npm run dev
 ```
 
+Type-check without a full build:
+
+```bash
+npm run typecheck
+```
+
 | Variable | Purpose |
 |---|---|
 | `NEXT_PUBLIC_API_URL` | REST base (`…/api`) |
