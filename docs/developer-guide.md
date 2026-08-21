@@ -30,14 +30,14 @@ Env (already filled in `.env.example`):
 
 ## What we are building
 
-- `/` — marketing landing (nav, hero, static chat preview)
+- `/` — marketing landing (hero, preview, what it does, footer)
 - `/login` — phone + name (auto-register)
 - `/app` — inbox, search, groups, history, send, live incoming, stick-to-bottom scroll
 
 The live backend is REST + Socket.io. We do not own it. Documented in [api-doc.md](./api-doc.md) and [Chat-API.postman_collection.json](./Chat-API.postman_collection.json).
 
-**Now:** core chat + landing foundation, nav, hero, and a static chat preview.  
-**Next:** landing footer, fake live message on the mock.
+**Now:** core chat + a full landing page (foundation through footer).  
+**Next:** fake live message on the landing mock.
 
 ## Where code lives
 
