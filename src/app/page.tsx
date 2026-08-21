@@ -1,21 +1,17 @@
-import { Container } from "@/features/landing/container";
-import { LandingButton } from "@/features/landing/landing-button";
+import { LandingHero } from "@/features/landing/landing-hero";
+import { LandingNav } from "@/features/landing/landing-nav";
 import { LandingShell } from "@/features/landing/landing-shell";
 
 /**
- * Marketing home. Foundation only — sections land in later tickets.
+ * Marketing home. Nav and hero first; preview and footer come next.
  * @returns JSX.Element
  */
 export default function HomePage() {
   return (
     <LandingShell>
-      <header className="h-landing-header border-b border-landing-ink/10">
-        <Container className="flex h-full items-center" />
-      </header>
-      <main className="py-landing-section">
-        <Container>
-          <LandingButton href="/login">Go to login</LandingButton>
-        </Container>
+      <LandingNav />
+      <main>
+        <LandingHero />
       </main>
     </LandingShell>
   );
