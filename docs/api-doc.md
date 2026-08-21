@@ -214,7 +214,7 @@ POST /auth/login
 
 Do **not** send `_id`, `createdAt`, or `token`. The database assigns `_id` and `createdAt`; the server returns `token`.
 
-The client must check the phone before login: E.164 (`+` then 10–15 digits), e.g. Bangladesh `+8801712345678`. `"abc"` and `01712345678` (no `+`) are rejected in the UI; the API would still accept them.
+The client only checks that the phone is a number before login. `"abc"` is rejected in the UI; the API would still accept it.
 
 ```json
 { "phone": "+15551234567", "name": "Ada Lovelace" }

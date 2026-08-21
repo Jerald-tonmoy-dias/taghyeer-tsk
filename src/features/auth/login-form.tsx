@@ -15,20 +15,17 @@ type FieldErrors = {
 };
 
 /**
- * Require an E.164 phone (`+` and country code) and a non-empty name.
+ * Require a numeric phone and a non-empty name.
  * @param phone - Phone field
  * @param name - Name field
  * @returns FieldErrors
  */
 function validateLogin(phone: string, name: string): FieldErrors {
   const errors: FieldErrors = {};
-  const normalized = phone.trim();
-  if (!normalized) {
+  if (!phone.trim()) {
     errors.phone = "Enter your phone number";
-  } else if (!normalized.startsWith("+")) {
-    errors.phone = "Start with + and your country code, e.g. +8801712345678";
   } else if (!isValidPhone(phone)) {
-    errors.phone = "Enter a valid number, e.g. +8801712345678 or +15551234567";
+    errors.phone = "Enter a number";
   }
   if (!name.trim()) {
     errors.name = "Enter your name";
@@ -84,25 +81,19 @@ export function LoginForm() {
           name="phone"
           type="tel"
           autoComplete="tel"
-          placeholder="+8801712345678"
-          inputMode="tel"
+          placeholder="01712345678"
+          inputMode="numeric"
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
           aria-invalid={Boolean(fieldErrors.phone)}
-          aria-describedby={
-            fieldErrors.phone ? "login-phone-error" : "login-phone-hint"
-          }
+          aria-describedby={fieldErrors.phone ? "login-phone-error" : undefined}
           disabled={pending}
         />
         {fieldErrors.phone ? (
           <p id="login-phone-error" className="text-sm text-destructive">
             {fieldErrors.phone}
           </p>
-        ) : (
-          <p id="login-phone-hint" className="text-sm text-muted-foreground">
-            Must start with +. Bangladesh: +8801712345678. US: +15551234567.
-          </p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-1.5">

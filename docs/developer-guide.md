@@ -32,12 +32,12 @@ Env (already filled in `.env.example`):
 
 - `/` — marketing landing (placeholder today)
 - `/login` — phone + name (auto-register)
-- `/app` — inbox, search, and message history (send next)
+- `/app` — inbox, search, history, and send
 
 The live backend is REST + Socket.io. We do not own it. Documented in [api-doc.md](./api-doc.md) and [Chat-API.postman_collection.json](./Chat-API.postman_collection.json).
 
-**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session, chat shell, inbox + search, message list.  
-**Next:** send, sockets, groups.
+**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session, chat shell, inbox + search, message list, send.  
+**Next:** sockets, groups.
 
 ## Where code lives
 
@@ -94,7 +94,7 @@ Incoming realtime (`message:new`) will be `lib/socket.ts` (not written yet). Sen
 - **Do not call** `GET /users/search` with an empty `q`.
 - **Search is exact and case-sensitive.** The API does not fold case or match partial words; `ada` and `Ada` can return different people.
 - **Do not send** whitespace-only messages (`sendMessage` already rejects them). The API would store `""`.
-- **Do not send** a free-text phone. The API does not verify numbers; the login form requires E.164 (`+8801712345678`).
+- **Do not send** a free-text phone. The API does not verify numbers; the login form only checks that the value is a number.
 - Names should be obvious in review (`payloads`, `toTimestampMs` — not `dto`, `epoch`).
 
 ## Auth (for the next ticket)
