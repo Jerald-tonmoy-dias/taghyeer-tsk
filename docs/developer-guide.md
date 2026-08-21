@@ -92,6 +92,7 @@ Incoming realtime (`message:new`) will be `lib/socket.ts` (not written yet). Sen
 - **No Zod.** Types + mappers + a few `trim()` checks. See system design §11.
 - **shadcn** for app chrome (forms, dialogs, sheets). Landing and message bubbles stay custom.
 - **Do not call** `GET /users/search` with an empty `q`.
+- **Search is exact and case-sensitive.** The API does not fold case or match partial words; `ada` and `Ada` can return different people.
 - **Do not send** whitespace-only messages (`sendMessage` already rejects them). The API would store `""`.
 - **Do not send** a free-text phone. The API does not verify numbers; the login form requires E.164 (`+8801712345678`).
 - Names should be obvious in review (`payloads`, `toTimestampMs` — not `dto`, `epoch`).
@@ -110,6 +111,7 @@ Incoming realtime (`message:new`) will be `lib/socket.ts` (not written yet). Sen
 | Socket never connects | Origin is `NEXT_PUBLIC_SOCKET_URL`, not the REST `/api` URL |
 | Own send does not appear | Sender has no `message:new`; use the REST response |
 | Inbox `lastMessage` empty | API sends `{}` — mapper turns that into `undefined` |
+| Search misses a known name | Query must match the stored spelling and case (`Ada`, not `ada`) |
 | `tsc` not found | Use `npm run typecheck`, not a global `tsc` |
 | Types missing `LayoutProps` | Run `npm run dev` once so Next generates `.next/types` |
 
