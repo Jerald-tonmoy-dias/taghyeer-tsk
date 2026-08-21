@@ -46,47 +46,66 @@ Open [http://localhost:3000](http://localhost:3000). Routes: `/` landing, `/logi
 
 ## Thought process
 
-I wrote the [system design](docs/system-design.md) before the screens. The short version of that document is still how the app works: landing is static, login stores a JWT, `/app` is a client app. TanStack Query talks to REST. Socket.io only pushes `message:new` into that same cache. I never wait on the socket for my own send — the bubble comes from `POST /messages`.
+The longer “why” is in [system design](docs/system-design.md). What follows is how I actually got there.
 
-### Why the chat is built this way
+### Approach
 
-The backend is a given. I probed it, documented it, then mapped it. I did not rename their routes. REST uses `_id` and ISO dates; the socket uses `id` and a millisecond timestamp, so `lib/mappers.ts` is the seam. Domain types in `lib/types.ts` always use `id` and milliseconds. That is in the design under “normalize,” and it saved a lot of “why doesn’t this match?” later.
+1. **Read the product through before touching code**, and separated what was written down from what was clearly expected anyway (loading, empty, and error states are not always listed, but a blank screen is never the answer).
+2. **Called the live API.** Swagger documents requests; it does not spell out bodies or status codes. I hit every REST endpoint and socket event and wrote down what came back. Nothing in the docs is guessed.
+3. **Wrote the API reference and a Postman collection** from those responses — [api-doc.md](docs/api-doc.md) and [Chat-API.postman_collection.json](docs/Chat-API.postman_collection.json).
+4. **Wrote the [system design](docs/system-design.md) before any UI** — data model, who owns state, how `/` vs `/app` render, and the realtime flow, all based on step 2.
+5. **Split the work into GitHub issues on a project board.** Core chat first (login, inbox, thread, send, socket, scroll, groups), landing second. That matches where the product actually lives.
+6. **One issue → one branch → one PR**, then merge. Same process for the landing page. Feature-wise commits, not one dump.
+7. **Wrote a [developer guide](docs/developer-guide.md)** so the next person does not have to re-derive the API quirks or the folder layout.
+8. **Shipped to Vercel and walked the live site** — landing, login, and `/app` — against the same checklist I started with. Demo: [taghyeer-tsk.vercel.app](https://taghyeer-tsk.vercel.app/).
 
-I send over REST and listen on the socket because that is what the API actually does. The sender does **not** get `message:new`. If I had shown my own message from the socket, it would never appear. Two transports is the cost; one write path is the win. Query holds inbox and history. I did not put the message list in Redux. If it is on the server, it lives in Query.
+### Architecture
 
-I skipped Zod on purpose. The design already says this: a schema would still need the same transforms (`_id` → `id`, empty `lastMessage: {}`), plus more code than `type User = { … }` and a `trim()` on login, search, and send. TypeScript is the contract. The live API is stable enough that parsing every payload at runtime felt like upkeep, not safety.
+Two findings from step 2 shaped the whole client:
 
-shadcn is for the app chrome (forms, dialog, buttons). Landing and bubbles stay custom. Phone is digits (optional `+`); the API will store any string, so the form has to be the adult in the room. Same for empty messages — they return `200` and get stored, so send is disabled when `text.trim()` is empty.
+- **REST and the socket return messages in different shapes** (`_id` + ISO string vs `id` + millisecond timestamp). Both land in one domain type via `lib/mappers.ts`.
+- **The sender never gets their own message over the socket.** Send is REST-first: append from `POST /messages`. The socket is receive-only for everyone else.
 
-Stick-to-bottom is the ~80px rule from the design: near the bottom, follow incoming; scrolled up, do not yank; send always jumps down because that is intent.
+Everything else follows from the design:
 
-What I cut, on purpose: group rename / members / leave, older-page pagination (`hasMore` is in the client but the UI only loads the first 30), a socket Connecting/Live badge. The design said if time slips, never cut thread + socket + scroll. I followed that.
+- **TanStack Query** for server state. No Redux or Zustand — there is no cross-cutting client store beyond cached server data and a little UI state (composer, stuck-to-bottom, `?c=`).
+- **No Zod.** The work is normalization (`_id` → `id`, `lastMessage: {}` → missing), not schema validation. TypeScript covers the shape. A runtime parser would still need those same transforms, plus more code than `type User = { … }` and a `trim()` on login, search, and send.
+- **shadcn/ui** for app chrome (forms, dialogs). Landing and message bubbles are custom — that is where a kit would flatten the look.
+- **Stick-to-bottom** is the ~80px rule in the design: near the bottom, follow incoming; scrolled up, stay put; send always jumps down.
 
-### Landing
+JWT lives in `localStorage` because the API is Bearer-only. That is an XSS trade-off I accepted; httpOnly cookies are not available without a backend we do not own.
 
-I wanted `/` to feel like people talking, not a dashboard and not a blue/purple “AI” gradient. Cream paper (`#F7F1EA`), vermillion as a **fill** (`#E24B32`) — I ran the hex pairs through a contrast check and vermillion-on-cream fails AA for body text (about 3.5:1), so links use `#A83422` and the primary button is `#C73E29` with a white label. Fraunces for the shout, Source Sans 3 for reading. Chat keeps Geist.
+### Design
 
-The preview is fake data. The extra is one incoming line after a few seconds, CSS/JS only, no socket on the marketing page. The first three bubbles still render if JS is slow.
+I wanted the landing page to feel like people talking, not a SaaS dashboard — no default blue/purple gradient. Cream paper (`#F7F1EA`), Fraunces on the hero, Source Sans 3 for body. Chat keeps Geist.
 
-### How I used AI
+One concrete call: vermillion `#E24B32` **fails WCAG AA as text** (~3.5:1 on cream). It stays a decorative fill. Links and accent text use `#A83422`. The primary button is `#C73E29` with a white label (checked at ~5.1:1). The product preview is static fake data. The extra touch is a mock incoming line after a few seconds — CSS/JS only, no live socket on a public page. The first three bubbles still render if JS is slow.
 
-I used Cursor in the repo the way I would use a pair: scaffold, typed client, a lot of the screens, and turning API probes into `docs/api-doc.md`. I did not let it invent endpoints. The workflow was mine — one issue, one branch, feature-wise commits, then a PR. I also pushed back: E.164 was too strict so I dropped it to “is this a number”; landing colors had to pass AA, not look warm. When a stacked PR’s parent branch got deleted, GitHub closed the child — I retargeted onto `main` instead of hoping the tool would fix git.
+### AI tool usage
 
-I still wrote the system design first. The AI filled code into that shape. When it named things like `dto` or got cute with phone rules, I made it boring on purpose (`payloads`, `toTimestampMs`).
+I used Cursor as a pair, not an autonomous generator. Issue → branch → PR was my process, and I looked at each piece before merge. It helped scaffold the app, build the typed client, implement screens from specs I wrote, and turn probe notes into documentation. It did not invent endpoints.
 
-### If I had more time
+What I changed or rejected:
 
-Load older messages when you hit the top (`limit` + `hasMore` — `before` was flaky in probes, so I would not bet the UX on it). A small Live / Offline mark for the socket, without logging anyone out. Group admin: rename, add, leave. Failed-send retry on a single bubble. None of that is missing from the core path.
+- Scaled an E.164-only phone check back to “is this a number?” — the API does not validate phones.
+- Rejected vermillion as text after the contrast check, not after eyeballing it.
+- Plain names (`payloads`, `toTimestampMs`) instead of `dto` / cute timestamps.
+- When a stacked PR’s parent branch was deleted, GitHub closed the child. I retargeted onto `main` myself. That is a git problem, not a prompt problem.
 
-### What the API actually did
+### With more time
 
-A few things I had to handle in the client because the server will not:
+- Older messages via `limit` / `hasMore`. The `before` cursor was unreliable in testing, so I would not bet the UX on it.
+- A socket Live / Offline mark that does **not** log anyone out on disconnect.
+- Group admin (rename, add, remove, leave). Create + group thread are already there.
+- Retry on a single failed send bubble.
 
-- **Search is exact and case-sensitive.** `ada` and `Ada` are different queries. We pass `q` through as typed and never call search with an empty `q` (that returns a dump of users).
-- **Empty messages are legal.** `""` and `"   "` return `200`. The composer blocks them.
-- **Inbox `lastMessage` can be `{}`.** The mapper treats that as missing.
-- **Missing JWT is `400 NO_TOKEN`**, not 401. Bad JWT is `401 INVALID_TOKEN`. Both clear the session.
-- **Socket origin is the host root**, not `/api`. Mixing those up means no live messages.
-- **No echo for the sender.** Use the REST body. I already said it; it is the one that bites in review if you skip it.
+### API issues found
 
-The longer versions live in [api-doc.md](docs/api-doc.md) and the “If something looks wrong” table in the [developer guide](docs/developer-guide.md).
+- Search is exact and case-sensitive (`ada` ≠ `Ada`). An empty `q` returns a dump of users, so the app never calls it empty.
+- Empty / whitespace messages return `200` and get stored. The composer blocks them.
+- `lastMessage: {}` means none, not `null`. The mapper treats it as missing.
+- Missing token → `400 NO_TOKEN`. Bad token → `401 INVALID_TOKEN`. The client looks at `error.code`, not only HTTP status, before clearing the session.
+- Socket origin is the **host root**, not `/api`. Easy to miss if you only copy the REST base.
+- The sender never receives their own `message:new`. That is the finding that matters most, and why send and receive use different transports.
+
+The “If something looks wrong” table in the [developer guide](docs/developer-guide.md) is the short version of this list.
