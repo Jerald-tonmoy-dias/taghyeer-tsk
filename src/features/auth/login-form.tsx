@@ -15,17 +15,20 @@ type FieldErrors = {
 };
 
 /**
- * Require a valid international phone and a non-empty name.
+ * Require an E.164 phone (`+` and country code) and a non-empty name.
  * @param phone - Phone field
  * @param name - Name field
  * @returns FieldErrors
  */
 function validateLogin(phone: string, name: string): FieldErrors {
   const errors: FieldErrors = {};
-  if (!phone.trim()) {
+  const normalized = phone.trim();
+  if (!normalized) {
     errors.phone = "Enter your phone number";
+  } else if (!normalized.startsWith("+")) {
+    errors.phone = "Start with + and your country code, e.g. +8801712345678";
   } else if (!isValidPhone(phone)) {
-    errors.phone = "Enter a valid number with country code, e.g. +15551234567";
+    errors.phone = "Enter a valid number, e.g. +8801712345678 or +15551234567";
   }
   if (!name.trim()) {
     errors.name = "Enter your name";
@@ -81,12 +84,14 @@ export function LoginForm() {
           name="phone"
           type="tel"
           autoComplete="tel"
-          placeholder="+15551234567"
+          placeholder="+8801712345678"
           inputMode="tel"
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
           aria-invalid={Boolean(fieldErrors.phone)}
-          aria-describedby={fieldErrors.phone ? "login-phone-error" : undefined}
+          aria-describedby={
+            fieldErrors.phone ? "login-phone-error" : "login-phone-hint"
+          }
           disabled={pending}
         />
         {fieldErrors.phone ? (
@@ -94,8 +99,8 @@ export function LoginForm() {
             {fieldErrors.phone}
           </p>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            International format with country code, e.g. +15551234567
+          <p id="login-phone-hint" className="text-sm text-muted-foreground">
+            Must start with +. Bangladesh: +8801712345678. US: +15551234567.
           </p>
         )}
       </div>

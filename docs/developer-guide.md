@@ -36,7 +36,7 @@ Env (already filled in `.env.example`):
 
 The live backend is REST + Socket.io. We do not own it. Documented in [api-doc.md](./api-doc.md) and [Chat-API.postman_collection.json](./Chat-API.postman_collection.json).
 
-**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session.  
+**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session, chat shell.  
 **Next:** inbox, thread, sockets, groups.
 
 ## Where code lives
@@ -93,7 +93,7 @@ Incoming realtime (`message:new`) will be `lib/socket.ts` (not written yet). Sen
 - **shadcn** for app chrome (forms, dialogs, sheets). Landing and message bubbles stay custom.
 - **Do not call** `GET /users/search` with an empty `q`.
 - **Do not send** whitespace-only messages (`sendMessage` already rejects them). The API would store `""`.
-- **Do not send** a free-text phone. The API does not verify numbers; the login form requires international format (`+15551234567`).
+- **Do not send** a free-text phone. The API does not verify numbers; the login form requires E.164 (`+8801712345678`).
 - Names should be obvious in review (`payloads`, `toTimestampMs` — not `dto`, `epoch`).
 
 ## Auth (for the next ticket)

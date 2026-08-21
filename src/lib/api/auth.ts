@@ -6,7 +6,7 @@ import type { Session, User } from "@/lib/types";
 
 /**
  * Log in or register with phone + name. Does not send a token.
- * Rejects values the API would accept that are not real phone numbers.
+ * Rejects values that are not E.164 (`+` and 10–15 digits, e.g. `+8801712345678`).
  * @param input.phone - User phone
  * @param input.name - Display name
  * @returns Promise<Session>
@@ -17,7 +17,7 @@ export async function login(input: {
 }): Promise<Session> {
   const phone = normalizePhone(input.phone);
   if (!isValidPhone(phone)) {
-    throw new Error("Enter a valid number with country code, e.g. +15551234567");
+    throw new Error("Enter a valid number starting with +, e.g. +8801712345678");
   }
 
   const payload = await apiRequest<ApiLoginResponse>("/auth/login", {
