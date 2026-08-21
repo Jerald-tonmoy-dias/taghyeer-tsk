@@ -4,7 +4,7 @@ import type {
   ApiGroupConversation,
   ApiInbox,
   ApiMessagePage,
-} from "@/lib/api/dto";
+} from "@/lib/api/payloads";
 import {
   mapConversation,
   mapCreatedDirect,

@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/api/client";
-import type { ApiMessage } from "@/lib/api/dto";
+import type { ApiMessage } from "@/lib/api/payloads";
 import { mapMessage } from "@/lib/mappers";
 import type { ConversationId, Message } from "@/lib/types";
 

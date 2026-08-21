@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/api/client";
-import type { ApiUser } from "@/lib/api/dto";
+import type { ApiUser } from "@/lib/api/payloads";
 import { mapUser } from "@/lib/mappers";
 import type { User } from "@/lib/types";
 

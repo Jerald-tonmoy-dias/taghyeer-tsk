@@ -183,6 +183,7 @@ Map: `NO_TOKEN` / `INVALID_TOKEN` → logout. `FORBIDDEN` / `NOT_FOUND` / `VALID
 
 ```
 src/lib/api/client.ts     // fetch + Bearer + parse errors
+src/lib/api/payloads.ts   // JSON as the server sends it
 src/lib/api/auth.ts
 src/lib/api/users.ts
 src/lib/api/conversations.ts
@@ -235,6 +236,7 @@ src/
 └── lib/
     ├── api/
     │   ├── client.ts
+    │   ├── payloads.ts               # JSON as the server sends it
     │   ├── auth.ts
     │   ├── users.ts
     │   ├── conversations.ts

@@ -1,3 +1,8 @@
+/**
+ * JSON shapes from the live REST API and Socket.io events,
+ * before mapping to domain types in `src/lib/types.ts`.
+ */
+
 export type ApiUser = {
   _id: string;
   name: string;

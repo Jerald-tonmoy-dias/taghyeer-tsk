@@ -9,7 +9,7 @@ import type {
   ApiMessagePage,
   ApiUser,
   SocketMessageNew,
-} from "@/lib/api/dto";
+} from "@/lib/api/payloads";
 import type {
   Conversation,
   CreatedDirect,
