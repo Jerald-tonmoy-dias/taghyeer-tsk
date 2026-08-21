@@ -36,8 +36,7 @@ Env (already filled in `.env.example`):
 
 The live backend is REST + Socket.io. We do not own it. Documented in [api-doc.md](./api-doc.md) and [Chat-API.postman_collection.json](./Chat-API.postman_collection.json).
 
-**Now:** core chat + landing, including a mock that receives a fake live line.  
-**Next:** README write-up and demo URLs.
+**Now:** core chat, landing, and the README write-up.
 
 ## Where code lives
 
