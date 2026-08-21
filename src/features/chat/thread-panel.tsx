@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MessageList } from "@/features/thread/message-list";
 import { listConversations } from "@/lib/api/conversations";
 import { conversationTitle } from "@/lib/conversation-title";
 
@@ -12,7 +13,7 @@ type ThreadPanelProps = {
 };
 
 /**
- * Right pane: empty state, or thread chrome when `?c=` is set.
+ * Right pane: empty state, or thread chrome and history when `?c=` is set.
  * @param props.conversationId - Selected conversation from the URL, or null
  * @returns JSX.Element
  */
@@ -41,7 +42,9 @@ export function ThreadPanel({ conversationId }: ThreadPanelProps) {
   const subtitle =
     conversation?.type === "direct"
       ? conversation.participant.phone
-      : "Messages will appear here";
+      : conversation?.type === "group"
+        ? `${conversation.participants.length} people`
+        : "";
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -62,9 +65,10 @@ export function ThreadPanel({ conversationId }: ThreadPanelProps) {
           <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
         </div>
       </header>
-      <div className="flex flex-1 items-center justify-center px-6 text-center">
-        <p className="text-sm text-muted-foreground">No messages yet.</p>
-      </div>
+      <MessageList
+        conversationId={conversationId}
+        conversation={conversation}
+      />
     </div>
   );
 }

@@ -32,12 +32,12 @@ Env (already filled in `.env.example`):
 
 - `/` — marketing landing (placeholder today)
 - `/login` — phone + name (auto-register)
-- `/app` — inbox, search, and thread chrome (messages next)
+- `/app` — inbox, search, and message history (send next)
 
 The live backend is REST + Socket.io. We do not own it. Documented in [api-doc.md](./api-doc.md) and [Chat-API.postman_collection.json](./Chat-API.postman_collection.json).
 
-**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session, chat shell, inbox + search.  
-**Next:** message list, send, sockets, groups.
+**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session, chat shell, inbox + search, message list.  
+**Next:** send, sockets, groups.
 
 ## Where code lives
 
