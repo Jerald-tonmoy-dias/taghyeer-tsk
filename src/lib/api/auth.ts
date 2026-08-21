@@ -1,10 +1,12 @@
 import { apiRequest } from "@/lib/api/client";
 import type { ApiLoginResponse, ApiUser } from "@/lib/api/payloads";
 import { mapSession, mapUser } from "@/lib/mappers";
+import { isValidPhone, normalizePhone } from "@/lib/phone";
 import type { Session, User } from "@/lib/types";
 
 /**
  * Log in or register with phone + name. Does not send a token.
+ * Rejects values the API would accept that are not real phone numbers.
  * @param input.phone - User phone
  * @param input.name - Display name
  * @returns Promise<Session>
@@ -13,10 +15,15 @@ export async function login(input: {
   phone: string;
   name: string;
 }): Promise<Session> {
+  const phone = normalizePhone(input.phone);
+  if (!isValidPhone(phone)) {
+    throw new Error("Enter a valid number with country code, e.g. +15551234567");
+  }
+
   const payload = await apiRequest<ApiLoginResponse>("/auth/login", {
     method: "POST",
     auth: false,
-    body: { phone: input.phone, name: input.name },
+    body: { phone, name: input.name.trim() },
   });
   return mapSession(payload);
 }
