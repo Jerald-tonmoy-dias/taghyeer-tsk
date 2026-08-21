@@ -230,7 +230,7 @@ src/
 │       └── ConnectionStatus.tsx
 │
 ├── components/
-│   └── ui/                           # Button, Input, Skeleton, Empty, ErrorState
+│   └── ui/                           # shadcn: Button, Input, Dialog, Sheet, …
 │
 └── lib/
     ├── api/
@@ -409,7 +409,7 @@ Landing (`/`) is static. Login stores a JWT. `/app` is a client app: TanStack Qu
 | TanStack Query | Loading/error/cache without Redux | Extra dependency |
 | CSR chat, SSG landing | Sockets + SEO split | Chat TTI after JS |
 | `localStorage` JWT | API is Bearer-only | XSS; document in README |
-| No UI kit | Faster unique landing | Build primitives |
+| shadcn/ui for app chrome | Accessible dialogs, forms, sheets without a heavy kit | Keep landing + bubbles custom |
 | Client empty-message guard | API stores `""` | Must not “trust the backend” |
 | Skip group admin UI in v1 if time-tight | Chat panel ships first | Still **create** group + chat |
 

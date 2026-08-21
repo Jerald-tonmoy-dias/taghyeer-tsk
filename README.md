@@ -7,6 +7,7 @@ Login with a phone number and name, search people, start conversations, and mess
 ## Stack
 
 - Next.js (App Router) + TypeScript
+- Tailwind CSS + [shadcn/ui](https://ui.shadcn.com) (Radix primitives)
 - TanStack Query for server state
 - Socket.io for incoming messages
 
