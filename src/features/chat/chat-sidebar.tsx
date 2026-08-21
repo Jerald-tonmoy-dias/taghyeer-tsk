@@ -6,13 +6,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/features/auth/auth-provider";
 import { ConversationList } from "@/features/inbox/conversation-list";
 import { SearchPeople } from "@/features/inbox/search-people";
+import { NewGroup } from "@/features/groups/new-group";
 
 type ChatSidebarProps = {
   selectedId: string | null;
 };
 
 /**
- * Left pane: session, people search, and inbox.
+ * Left pane: session, people search, new group, and inbox.
  * @param props.selectedId - Open conversation from `?c=`
  * @returns JSX.Element
  */
@@ -36,6 +37,9 @@ export function ChatSidebar({ selectedId }: ChatSidebarProps) {
           <LogOut />
         </Button>
       </header>
+      <div className="flex flex-col gap-2 border-b px-3 py-2">
+        <NewGroup />
+      </div>
       <SearchPeople />
       <ScrollArea className="min-h-0 flex-1">
         <ConversationList selectedId={selectedId} />
