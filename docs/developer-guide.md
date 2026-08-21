@@ -93,7 +93,7 @@ Incoming realtime (`message:new`) will be `lib/socket.ts` (not written yet). Sen
 - **shadcn** for app chrome (forms, dialogs, sheets). Landing and message bubbles stay custom.
 - **Do not call** `GET /users/search` with an empty `q`.
 - **Do not send** whitespace-only messages (`sendMessage` already rejects them). The API would store `""`.
-- **Do not send** a free-text phone. The API does not verify numbers; the login form requires at least 10 digits.
+- **Do not send** a free-text phone. The API does not verify numbers; the login form requires E.164 (`+8801712345678`).
 - Names should be obvious in review (`payloads`, `toTimestampMs` — not `dto`, `epoch`).
 
 ## Auth (for the next ticket)

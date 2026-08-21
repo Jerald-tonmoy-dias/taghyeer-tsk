@@ -1,4 +1,8 @@
-const MIN_PHONE_DIGITS = 10;
+/**
+ * E.164: `+` then 10–15 digits, first digit 1–9.
+ * Covers Bangladesh (`+8801712345678`) and other country codes (`+15551234567`).
+ */
+const E164_PHONE = /^\+[1-9]\d{9,14}$/;
 
 /**
  * Strip spaces, dashes, dots, and parentheses from a phone field.
@@ -10,25 +14,11 @@ export function normalizePhone(phone: string): string {
 }
 
 /**
- * Digits only, ignoring an optional leading `+`.
- * @param phone - Raw or normalized input
- * @returns string
- */
-export function phoneDigits(phone: string): string {
-  const normalized = normalizePhone(phone);
-  const withoutPlus = normalized.startsWith("+")
-    ? normalized.slice(1)
-    : normalized;
-  return withoutPlus;
-}
-
-/**
- * True when the value is digits (optional `+`) and at least 10 digits long.
- * The live API does not check format — it stores any string.
+ * Whether the value is an E.164 number (must start with `+`).
+ * The live API does not check this — it stores any string.
  * @param phone - Raw or normalized input
  * @returns boolean
  */
 export function isValidPhone(phone: string): boolean {
-  const digits = phoneDigits(phone);
-  return /^\d+$/.test(digits) && digits.length >= MIN_PHONE_DIGITS;
+  return E164_PHONE.test(normalizePhone(phone));
 }
