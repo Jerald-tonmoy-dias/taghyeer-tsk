@@ -32,12 +32,12 @@ Env (already filled in `.env.example`):
 
 - `/` — marketing landing (placeholder today)
 - `/login` — phone + name (auto-register)
-- `/app` — inbox, search, history, and send
+- `/app` — inbox, search, history, send, and live incoming messages
 
 The live backend is REST + Socket.io. We do not own it. Documented in [api-doc.md](./api-doc.md) and [Chat-API.postman_collection.json](./Chat-API.postman_collection.json).
 
-**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session, chat shell, inbox + search, message list, send.  
-**Next:** sockets, groups.
+**Now:** Next.js scaffold, shadcn chrome, typed API client, login + session, chat shell, inbox + search, message list, send, live incoming.  
+**Next:** auto-scroll, groups.
 
 ## Where code lives
 
@@ -80,7 +80,7 @@ Supporting files:
 | `lib/mappers.ts` | Payloads → `lib/types.ts` |
 | `lib/types.ts` | What the UI should use |
 
-Incoming realtime (`message:new`) will be `lib/socket.ts` (not written yet). Send stays REST.
+Incoming realtime (`message:new`) is `lib/socket.ts`. Send stays REST.
 
 `createdAt` in domain types is **milliseconds since 1 Jan 1970**. REST sends an ISO string; sockets send a number. `toTimestampMs()` normalizes both.
 
