@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,28 +8,36 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/features/auth/auth-provider";
 import { groupSenderName } from "@/features/thread/group-sender-name";
 import { MessageBubble } from "@/features/thread/message-bubble";
+import {
+  messageQueryKey,
+  type MessageThread,
+} from "@/features/thread/message-cache";
 import { getMessages } from "@/lib/api/conversations";
 import type { Conversation } from "@/lib/types";
 
 type MessageListProps = {
   conversationId: string;
   conversation?: Conversation;
+  scrollToken: number;
 };
 
 /**
  * Load a thread’s latest page and render oldest → newest.
  * @param props.conversationId - Open conversation
  * @param props.conversation - Inbox row, used for group sender names
+ * @param props.scrollToken - Incremented after send to jump to the latest
  * @returns JSX.Element
  */
 export function MessageList({
   conversationId,
   conversation,
+  scrollToken,
 }: MessageListProps) {
   const { user } = useAuth();
+  const endRef = useRef<HTMLDivElement>(null);
   const messagesQuery = useQuery({
-    queryKey: ["messages", conversationId],
-    queryFn: async () => {
+    queryKey: messageQueryKey(conversationId),
+    queryFn: async (): Promise<MessageThread> => {
       const page = await getMessages(conversationId, { limit: 30 });
       return {
         messages: [...page.messages].reverse(),
@@ -36,6 +45,22 @@ export function MessageList({
       };
     },
   });
+
+  useLayoutEffect(() => {
+    if (scrollToken === 0) {
+      return;
+    }
+    const end = endRef.current;
+    if (!end) {
+      return;
+    }
+    const viewport = end.closest("[data-slot='scroll-area-viewport']");
+    if (viewport instanceof HTMLElement) {
+      viewport.scrollTop = viewport.scrollHeight;
+      return;
+    }
+    end.scrollIntoView({ block: "end" });
+  }, [scrollToken]);
 
   if (messagesQuery.isPending) {
     return (
@@ -89,6 +114,7 @@ export function MessageList({
             />
           );
         })}
+        <div ref={endRef} />
       </div>
     </ScrollArea>
   );

@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Composer } from "@/features/thread/composer";
 import { MessageList } from "@/features/thread/message-list";
 import { listConversations } from "@/lib/api/conversations";
 import { conversationTitle } from "@/lib/conversation-title";
@@ -18,6 +20,7 @@ type ThreadPanelProps = {
  * @returns JSX.Element
  */
 export function ThreadPanel({ conversationId }: ThreadPanelProps) {
+  const [scrollToken, setScrollToken] = useState(0);
   const inboxQuery = useQuery({
     queryKey: ["conversations"],
     queryFn: listConversations,
@@ -68,6 +71,11 @@ export function ThreadPanel({ conversationId }: ThreadPanelProps) {
       <MessageList
         conversationId={conversationId}
         conversation={conversation}
+        scrollToken={scrollToken}
+      />
+      <Composer
+        conversationId={conversationId}
+        onSent={() => setScrollToken((token) => token + 1)}
       />
     </div>
   );
