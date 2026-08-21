@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/features/auth/auth-provider";
 import { isApiError } from "@/lib/api/error";
+import { isValidPhone, normalizePhone } from "@/lib/phone";
 
 type FieldErrors = {
   phone?: string;
@@ -14,7 +15,7 @@ type FieldErrors = {
 };
 
 /**
- * Require non-empty phone and name.
+ * Require a valid international phone and a non-empty name.
  * @param phone - Phone field
  * @param name - Name field
  * @returns FieldErrors
@@ -23,6 +24,8 @@ function validateLogin(phone: string, name: string): FieldErrors {
   const errors: FieldErrors = {};
   if (!phone.trim()) {
     errors.phone = "Enter your phone number";
+  } else if (!isValidPhone(phone)) {
+    errors.phone = "Enter a valid number with country code, e.g. +15551234567";
   }
   if (!name.trim()) {
     errors.name = "Enter your name";
@@ -54,7 +57,7 @@ export function LoginForm() {
 
     setPending(true);
     try {
-      await login({ phone: phone.trim(), name: name.trim() });
+      await login({ phone: normalizePhone(phone), name: name.trim() });
       router.replace("/app");
     } catch (error) {
       setFormError(
@@ -79,6 +82,7 @@ export function LoginForm() {
           type="tel"
           autoComplete="tel"
           placeholder="+15551234567"
+          inputMode="tel"
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
           aria-invalid={Boolean(fieldErrors.phone)}
@@ -89,7 +93,11 @@ export function LoginForm() {
           <p id="login-phone-error" className="text-sm text-destructive">
             {fieldErrors.phone}
           </p>
-        ) : null}
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            International format with country code, e.g. +15551234567
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-1.5">
