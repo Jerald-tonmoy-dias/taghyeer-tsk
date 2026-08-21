@@ -1,21 +1,22 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Container } from "@/features/landing/container";
+import { LandingButton } from "@/features/landing/landing-button";
+import { LandingShell } from "@/features/landing/landing-shell";
 
+/**
+ * Marketing home. Foundation only — sections land in later tickets.
+ * @returns JSX.Element
+ */
 export default function HomePage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-4 px-6">
-      <p className="text-sm uppercase tracking-wide text-muted-foreground">
-        Taghyeer
-      </p>
-      <h1 className="text-3xl font-semibold tracking-tight">
-        Real-time 1:1 and group chat
-      </h1>
-      <p className="text-muted-foreground">
-        Landing page comes later. The app is being built next.
-      </p>
-      <Button asChild className="w-fit">
-        <Link href="/login">Go to login</Link>
-      </Button>
-    </main>
+    <LandingShell>
+      <header className="h-landing-header border-b border-landing-ink/10">
+        <Container className="flex h-full items-center" />
+      </header>
+      <main className="py-landing-section">
+        <Container>
+          <LandingButton href="/login">Go to login</LandingButton>
+        </Container>
+      </main>
+    </LandingShell>
   );
 }
