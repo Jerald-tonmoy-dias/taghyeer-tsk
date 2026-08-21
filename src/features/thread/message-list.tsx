@@ -1,9 +1,8 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/features/auth/auth-provider";
 import { groupSenderName } from "@/features/thread/group-sender-name";
@@ -12,6 +11,7 @@ import {
   messageQueryKey,
   type MessageThread,
 } from "@/features/thread/message-cache";
+import { useStickToBottom } from "@/features/thread/use-stick-to-bottom";
 import { getMessages } from "@/lib/api/conversations";
 import type { Conversation } from "@/lib/types";
 
@@ -23,6 +23,7 @@ type MessageListProps = {
 
 /**
  * Load a thread’s latest page and render oldest → newest.
+ * Stays pinned to the latest message unless the user scrolls up.
  * @param props.conversationId - Open conversation
  * @param props.conversation - Inbox row, used for group sender names
  * @param props.scrollToken - Incremented after send to jump to the latest
@@ -34,7 +35,7 @@ export function MessageList({
   scrollToken,
 }: MessageListProps) {
   const { user } = useAuth();
-  const endRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const messagesQuery = useQuery({
     queryKey: messageQueryKey(conversationId),
     queryFn: async (): Promise<MessageThread> => {
@@ -46,21 +47,13 @@ export function MessageList({
     },
   });
 
-  useLayoutEffect(() => {
-    if (scrollToken === 0) {
-      return;
-    }
-    const end = endRef.current;
-    if (!end) {
-      return;
-    }
-    const viewport = end.closest("[data-slot='scroll-area-viewport']");
-    if (viewport instanceof HTMLElement) {
-      viewport.scrollTop = viewport.scrollHeight;
-      return;
-    }
-    end.scrollIntoView({ block: "end" });
-  }, [scrollToken]);
+  const messageCount = messagesQuery.data?.messages.length ?? 0;
+  const { onScroll } = useStickToBottom({
+    conversationId,
+    messageCount,
+    forceToken: scrollToken,
+    viewportRef,
+  });
 
   if (messagesQuery.isPending) {
     return (
@@ -97,7 +90,11 @@ export function MessageList({
   }
 
   return (
-    <ScrollArea className="min-h-0 flex-1">
+    <div
+      ref={viewportRef}
+      onScroll={onScroll}
+      className="min-h-0 flex-1 overflow-y-auto"
+    >
       <div className="flex flex-col gap-2 px-4 py-4">
         {messagesQuery.data.messages.map((message) => {
           const isMine = message.senderId === user?.id;
@@ -114,8 +111,7 @@ export function MessageList({
             />
           );
         })}
-        <div ref={endRef} />
       </div>
-    </ScrollArea>
+    </div>
   );
 }
