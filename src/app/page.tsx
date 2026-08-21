@@ -1,9 +1,10 @@
 import { LandingHero } from "@/features/landing/landing-hero";
 import { LandingNav } from "@/features/landing/landing-nav";
 import { LandingShell } from "@/features/landing/landing-shell";
+import { ProductPreview } from "@/features/landing/product-preview";
 
 /**
- * Marketing home. Nav and hero first; preview and footer come next.
+ * Marketing home. Preview is static fake chat — no API.
  * @returns JSX.Element
  */
 export default function HomePage() {
@@ -12,6 +13,7 @@ export default function HomePage() {
       <LandingNav />
       <main>
         <LandingHero />
+        <ProductPreview />
       </main>
     </LandingShell>
   );
