@@ -252,6 +252,7 @@ src/
 - Containers (pages / `ChatShell`) fetch and map.
 - `MessageBubble`, `ConversationRow` are presentational + `React.memo`.
 - Keep pages thin; logic lives under `features/`.
+- Functions use a short JSDoc: summary, `@param`, `@returns`.
 
 ---
 

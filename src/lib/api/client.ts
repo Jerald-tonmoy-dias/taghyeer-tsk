@@ -8,6 +8,10 @@ type ApiRequestOptions = {
   query?: Record<string, string | number | undefined>;
 };
 
+/**
+ * Resolve the REST base URL from env (no trailing slash).
+ * @returns string
+ */
 function getBaseUrl(): string {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!baseUrl) {
@@ -16,6 +20,12 @@ function getBaseUrl(): string {
   return baseUrl.replace(/\/$/, "");
 }
 
+/**
+ * Append defined query params to a path.
+ * @param path - API path, e.g. `/users/search`
+ * @param query - Optional key/value query map
+ * @returns string
+ */
 function withQuery(
   path: string,
   query?: Record<string, string | number | undefined>,
@@ -36,6 +46,12 @@ function withQuery(
   return qs ? `${path}?${qs}` : path;
 }
 
+/**
+ * JSON fetch against the chat API. Attaches Bearer when a token exists.
+ * @param path - Path under `NEXT_PUBLIC_API_URL`
+ * @param options - Method, body, auth flag, and query
+ * @returns Promise<T>
+ */
 export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {},

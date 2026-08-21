@@ -3,6 +3,11 @@ import type { ApiUser } from "@/lib/api/dto";
 import { mapUser } from "@/lib/mappers";
 import type { User } from "@/lib/types";
 
+/**
+ * Search people by name or phone. Empty `q` does not call the API.
+ * @param q - Search query
+ * @returns Promise<User[]>
+ */
 export async function searchUsers(q: string): Promise<User[]> {
   const query = q.trim();
   if (!query) {
