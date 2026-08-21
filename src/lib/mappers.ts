@@ -23,11 +23,11 @@ import type {
 } from "@/lib/types";
 
 /**
- * Convert an ISO date string or epoch ms to epoch milliseconds.
- * @param value - ISO timestamp or numeric epoch ms
- * @returns number
+ * Convert an ISO date string or a millisecond timestamp to milliseconds since 1 Jan 1970.
+ * @param value - REST ISO string (`"2026-08-21T11:56:18.736Z"`) or socket millisecond number
+ * @returns number — timestamp in milliseconds
  */
-export function toEpochMs(value: string | number): number {
+export function toTimestampMs(value: string | number): number {
   if (typeof value === "number") {
     return value;
   }
@@ -72,7 +72,7 @@ function mapLastMessage(value?: ApiLastMessage): LastMessage | undefined {
   return {
     text: value.text,
     senderId: value.sender,
-    createdAt: toEpochMs(value.createdAt),
+    createdAt: toTimestampMs(value.createdAt),
   };
 }
 
@@ -149,13 +149,13 @@ export function mapMessage(message: ApiMessage): Message {
     conversationId: message.conversation,
     senderId: message.sender,
     text: message.text,
-    createdAt: toEpochMs(message.createdAt),
+    createdAt: toTimestampMs(message.createdAt),
     status: "sent",
   };
 }
 
 /**
- * Map a socket `message:new` payload (`id`, numeric `createdAt`).
+ * Map a socket `message:new` payload (`id`, `createdAt` as milliseconds).
  * @param payload - Socket message event
  * @returns Message
  */
@@ -165,7 +165,7 @@ export function mapSocketMessage(payload: SocketMessageNew): Message {
     conversationId: payload.conversation,
     senderId: payload.sender,
     text: payload.text,
-    createdAt: toEpochMs(payload.createdAt),
+    createdAt: toTimestampMs(payload.createdAt),
     status: "sent",
   };
 }

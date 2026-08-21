@@ -66,7 +66,7 @@ export type ApiInbox = {
   data: ApiConversation[];
 };
 
-/** Socket.io `message:new` — `id` + numeric `createdAt`, not REST `_id` + ISO. */
+/** Socket.io `message:new` — `id` + `createdAt` in milliseconds, not REST `_id` + ISO date. */
 export type SocketMessageNew = {
   id: string;
   conversation: string;

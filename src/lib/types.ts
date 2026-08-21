@@ -15,6 +15,7 @@ export type Message = {
   conversationId: ConversationId;
   senderId: UserId;
   text: string;
+  /** Milliseconds since 1 Jan 1970 (same unit for REST and socket). */
   createdAt: number;
   status?: MessageStatus;
 };
@@ -22,6 +23,7 @@ export type Message = {
 export type LastMessage = {
   text: string;
   senderId: UserId;
+  /** Milliseconds since 1 Jan 1970. */
   createdAt: number;
 };
 

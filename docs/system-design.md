@@ -90,7 +90,7 @@ type Message = {
   conversationId: ConversationId;
   senderId: UserId;
   text: string;
-  createdAt: number;   // always ms epoch in the client
+  createdAt: number;   // milliseconds since 1 Jan 1970
   status?: "sending" | "sent" | "failed"; // client-only
 };
 
@@ -189,7 +189,7 @@ src/lib/api/users.ts
 src/lib/api/conversations.ts
 src/lib/api/messages.ts
 src/lib/socket.ts         // singleton, token handshake
-src/lib/mappers.ts        // _id → id, createdAt → number
+src/lib/mappers.ts        // _id → id, createdAt → milliseconds
 ```
 
 ---
@@ -417,7 +417,7 @@ Landing (`/`) is static. Login stores a JWT. `/app` is a client app: TanStack Qu
 | Client empty-message guard | API stores `""` | Must not “trust the backend” |
 | Skip group admin UI in v1 if time-tight | Chat panel ships first | Still **create** group + chat |
 
-Zod would not remove the mappers. REST and UI shapes differ (`_id` vs `id`, ISO vs epoch, empty `lastMessage: {}`), so a schema would still need the same transforms, plus more code than `type User = { … }` and a `trim()` on login/search/send. TypeScript is the contract; the live API is stable enough that parsing every payload at runtime is extra upkeep, not safety.
+Zod would not remove the mappers. REST and UI shapes differ (`_id` vs `id`, ISO date vs millisecond timestamp, empty `lastMessage: {}`), so a schema would still need the same transforms, plus more code than `type User = { … }` and a `trim()` on login/search/send. TypeScript is the contract; the live API is stable enough that parsing every payload at runtime is extra upkeep, not safety.
 
 **Deliberately not solved:** typing, receipts, offline queue, signed-cookie auth, `before` cursor correctness, newly-added member socket (not probed).
 
