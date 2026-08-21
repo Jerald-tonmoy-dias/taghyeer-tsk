@@ -1,10 +1,6 @@
 import { Container } from "@/features/landing/container";
-import {
-  previewInbox,
-  previewThread,
-  type PreviewBubble,
-  type PreviewRow,
-} from "@/features/landing/preview-data";
+import { previewInbox, type PreviewRow } from "@/features/landing/preview-data";
+import { PreviewLiveThread } from "@/features/landing/preview-live-thread";
 import { cn } from "@/lib/utils";
 
 /**
@@ -27,37 +23,7 @@ function PreviewInboxRow({ row }: { row: PreviewRow }) {
 }
 
 /**
- * One fake bubble. Own messages use the AA button fill; others use tint.
- * @param props.bubble - Static message
- * @returns JSX.Element
- */
-function PreviewBubbleRow({ bubble }: { bubble: PreviewBubble }) {
-  return (
-    <div className={cn("flex", bubble.mine ? "justify-end" : "justify-start")}>
-      <div
-        className={cn(
-          "max-w-[80%] rounded-2xl px-3 py-2",
-          bubble.mine
-            ? "bg-landing-button text-white"
-            : "bg-landing-tint text-landing-ink",
-        )}
-      >
-        <p className="text-sm leading-relaxed">{bubble.text}</p>
-        <p
-          className={cn(
-            "mt-1 text-[11px]",
-            bubble.mine ? "text-white/80" : "text-landing-ink/60",
-          )}
-        >
-          {bubble.time}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Static two-pane chat mock. No API, no sockets.
+ * Static two-pane chat mock. The thread hydrates a late incoming bubble in JS.
  * @returns JSX.Element
  */
 export function ProductPreview() {
@@ -81,11 +47,7 @@ export function ProductPreview() {
               <p className="border-b border-landing-ink/10 px-4 py-3 text-sm font-semibold">
                 Ada
               </p>
-              <div className="flex flex-1 flex-col justify-end gap-2 px-4 py-4">
-                {previewThread.map((bubble) => (
-                  <PreviewBubbleRow key={bubble.id} bubble={bubble} />
-                ))}
-              </div>
+              <PreviewLiveThread />
             </div>
           </div>
         </div>

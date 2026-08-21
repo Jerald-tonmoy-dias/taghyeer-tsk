@@ -33,6 +33,13 @@ export const previewInbox: PreviewRow[] = [
   },
 ];
 
+export const previewIncoming: PreviewBubble = {
+  id: "4",
+  text: "See you in five.",
+  time: "7:15 PM",
+  mine: false,
+};
+
 export const previewThread: PreviewBubble[] = [
   {
     id: "1",
