@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Container } from "@/features/landing/container";
 import { LandingAvatar } from "@/features/landing/landing-ui";
 import { previewInbox } from "@/features/landing/preview-data";
+import { cn } from "@/lib/utils";
 
 /**
  * Check row under a spotlight heading.
@@ -22,11 +23,23 @@ function SpotlightCheck({ children }: { children: string }) {
 /**
  * Soft frame around a mini product mock.
  * @param props.children - Mock
+ * @param props.className - Extra classes (used to flip the zig-zag)
  * @returns JSX.Element
  */
-function SpotlightFrame({ children }: { children: ReactNode }) {
+function SpotlightFrame({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="rounded-3xl border border-blue-100/70 bg-gradient-to-br from-blue-50/70 via-slate-50 to-indigo-50/60 p-4 shadow-xl shadow-slate-200/50 sm:p-7">
+    <div
+      className={cn(
+        "rounded-3xl border border-blue-100/70 bg-gradient-to-br from-blue-50/70 via-slate-50 to-indigo-50/60 p-4 shadow-xl shadow-slate-200/50 sm:p-7",
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -134,7 +147,7 @@ export function LandingSpotlights() {
               </SpotlightCheck>
             </ul>
           </div>
-          <SpotlightFrame>
+          <SpotlightFrame className="lg:order-2">
             <div className="space-y-4 rounded-2xl border border-landing-border bg-white p-5 font-chat shadow-md">
               <div className="flex flex-col items-start">
                 <div className="relative max-w-sm rounded-2xl rounded-tl-sm border border-slate-200 bg-slate-50 px-4 pt-3 pb-2 text-xs leading-relaxed text-slate-900">
