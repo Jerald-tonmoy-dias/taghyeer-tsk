@@ -10,7 +10,7 @@ export function LandingClose() {
     <section className="bg-landing-ink px-6 pt-24 pb-20 text-landing-surface sm:px-12">
       <Container className="max-w-4xl space-y-6 text-center">
         <div className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/60 px-3.5 py-1 font-landing-mono text-[11px] tracking-widest text-slate-300 uppercase">
-          Open chat
+          Ready when you are
         </div>
         <h2 className="font-landing-display text-4xl leading-tight font-normal tracking-tight sm:text-6xl">
           Explore the chat experience.
