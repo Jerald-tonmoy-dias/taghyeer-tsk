@@ -24,27 +24,48 @@ function MessageBubbleComponent({
   senderName,
 }: MessageBubbleProps) {
   return (
-    <div className={cn("flex", isMine ? "justify-end" : "justify-start")}>
+    <div
+      className={cn(
+        "flex flex-col font-chat",
+        isMine ? "items-end" : "items-start",
+      )}
+    >
+      {senderName ? (
+        <span className="mb-1 ml-2 font-landing-sans text-[11px] font-semibold text-indigo-700">
+          {senderName}
+        </span>
+      ) : null}
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl px-3 py-2",
+          "relative max-w-lg rounded-2xl px-4 pt-2.5 pb-2 text-[13.5px] leading-relaxed tracking-[-0.01em] shadow-xs",
           isMine
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-foreground",
+            ? "rounded-tr-sm bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/15"
+            : "rounded-tl-sm border border-landing-border bg-white text-slate-900",
         )}
       >
-        {senderName ? (
-          <p className="mb-0.5 text-xs font-medium">{senderName}</p>
-        ) : null}
-        <p className="whitespace-pre-wrap break-words text-sm">{message.text}</p>
-        <p
+        <p className="pr-16 whitespace-pre-wrap break-words">{message.text}</p>
+        <div
           className={cn(
-            "mt-1 text-[11px]",
-            isMine ? "text-primary-foreground/70" : "text-muted-foreground",
+            "absolute right-2.5 bottom-1.5 flex select-none items-center gap-1 font-landing-mono text-[10px]",
+            isMine ? "text-blue-100/80" : "text-slate-400",
           )}
         >
-          {formatMessageTime(message.createdAt)}
-        </p>
+          <span>{formatMessageTime(message.createdAt)}</span>
+          {isMine && message.status !== "failed" ? (
+            <svg
+              className="h-3.5 w-3.5 text-blue-200"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden
+            >
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -88,3 +88,60 @@ export async function getMessages(
   );
   return mapMessagePage(payload);
 }
+
+/**
+ * Rename a group. Admin only.
+ * @param conversationId - Group id
+ * @param name - New title
+ * @returns Promise<GroupConversation>
+ */
+export async function renameGroup(
+  conversationId: ConversationId,
+  name: string,
+): Promise<GroupConversation> {
+  const payload = await apiRequest<ApiGroupConversation>(
+    `/conversations/${conversationId}`,
+    {
+      method: "PATCH",
+      body: { name },
+    },
+  );
+  return mapGroupConversation(payload);
+}
+
+/**
+ * Add people to a group. Admin only.
+ * @param conversationId - Group id
+ * @param userIds - Users to add
+ * @returns Promise<GroupConversation>
+ */
+export async function addParticipants(
+  conversationId: ConversationId,
+  userIds: UserId[],
+): Promise<GroupConversation> {
+  const payload = await apiRequest<ApiGroupConversation>(
+    `/conversations/${conversationId}/participants`,
+    {
+      method: "POST",
+      body: { userIds },
+    },
+  );
+  return mapGroupConversation(payload);
+}
+
+/**
+ * Remove a member, or leave when `userId` is the current user.
+ * @param conversationId - Group id
+ * @param userId - Member to remove, or self to leave
+ * @returns Promise<GroupConversation>
+ */
+export async function removeParticipant(
+  conversationId: ConversationId,
+  userId: UserId,
+): Promise<GroupConversation> {
+  const payload = await apiRequest<ApiGroupConversation>(
+    `/conversations/${conversationId}/participants/${userId}`,
+    { method: "DELETE" },
+  );
+  return mapGroupConversation(payload);
+}
