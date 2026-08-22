@@ -29,10 +29,11 @@ export function LandingHero() {
             not an algorithm.
           </span>
         </h1>
-        <p className="mx-auto mb-10 max-w-2xl text-base font-normal leading-relaxed text-landing-muted sm:text-lg md:text-xl">
+        <p className="mx-auto mb-10 max-w-3xl text-base font-normal leading-relaxed text-landing-muted sm:text-lg md:text-xl">
           A focused chat experience for one-to-one and group conversations.
-          Search for people, send messages, and see new replies arrive in real
-          time.
+          <br />
+          Search for people, send messages, and stay connected with real-time
+          updates.
         </p>
         <div className="mb-10 flex items-center justify-center">
           <LandingButton href="/login" className="w-full gap-2 sm:w-auto">
