@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ChatSidebar } from "@/features/chat/chat-sidebar";
 import { RoomDetails } from "@/features/chat/room-details";
 import { ThreadPanel } from "@/features/chat/thread-panel";
+import { useSyncOpenConversation } from "@/features/inbox/unread-store";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,6 +17,7 @@ export function ChatShell() {
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("c");
   const isThreadOpen = Boolean(conversationId);
+  useSyncOpenConversation(conversationId);
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const detailsOpen = Boolean(conversationId && detailsId === conversationId);
 

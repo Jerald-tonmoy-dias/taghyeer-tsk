@@ -2,6 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ConversationRow } from "@/features/inbox/conversation-row";
+import { sortConversationsByLatest } from "@/features/inbox/sort-conversations";
+import { useUnreadConversationIds } from "@/features/inbox/unread-store";
 import { listConversations } from "@/lib/api/conversations";
 
 type ConversationListProps = {
@@ -16,6 +18,7 @@ type ConversationListProps = {
  * @returns JSX.Element
  */
 export function ConversationList({ selectedId, tab }: ConversationListProps) {
+  const unreadIds = useUnreadConversationIds();
   const inboxQuery = useQuery({
     queryKey: ["conversations"],
     queryFn: listConversations,
@@ -46,10 +49,12 @@ export function ConversationList({ selectedId, tab }: ConversationListProps) {
     );
   }
 
-  const rows = inboxQuery.data.filter((conversation) =>
-    tab === "group"
-      ? conversation.type === "group"
-      : conversation.type === "direct",
+  const rows = sortConversationsByLatest(
+    inboxQuery.data.filter((conversation) =>
+      tab === "group"
+        ? conversation.type === "group"
+        : conversation.type === "direct",
+    ),
   );
 
   if (rows.length === 0) {
@@ -69,6 +74,7 @@ export function ConversationList({ selectedId, tab }: ConversationListProps) {
           key={conversation.id}
           conversation={conversation}
           selected={conversation.id === selectedId}
+          unread={unreadIds.has(conversation.id)}
         />
       ))}
     </div>
