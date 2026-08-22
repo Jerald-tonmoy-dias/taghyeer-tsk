@@ -1,16 +1,23 @@
-import { Fraunces, Source_Sans_3 } from "next/font/google";
+import { JetBrains_Mono, Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-const fraunces = Fraunces({
+const newsreader = Newsreader({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-newsreader",
+  display: "swap",
+  style: ["normal", "italic"],
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
   display: "swap",
 });
 
-const sourceSans = Source_Sans_3({
+const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-source-sans",
+  variable: "--font-jetbrains",
   display: "swap",
 });
 
@@ -19,7 +26,7 @@ type LandingShellProps = {
 };
 
 /**
- * Cream canvas and landing fonts. Used only on `/` so chat keeps Geist.
+ * Landing canvas, fonts, and selection. Used only on `/` so chat keeps Geist.
  * @param props.children - Landing page
  * @returns JSX.Element
  */
@@ -27,9 +34,10 @@ export function LandingShell({ children }: LandingShellProps) {
   return (
     <div
       className={cn(
-        fraunces.variable,
-        sourceSans.variable,
-        "min-h-dvh bg-landing-cream font-landing-sans text-landing-ink antialiased",
+        newsreader.variable,
+        plusJakarta.variable,
+        jetbrains.variable,
+        "min-h-dvh scroll-smooth bg-landing-cream font-landing-sans text-landing-ink antialiased selection:bg-landing-primary selection:text-landing-surface",
       )}
     >
       {children}

@@ -2,7 +2,9 @@ export type PreviewRow = {
   id: string;
   title: string;
   preview: string;
+  time: string;
   selected: boolean;
+  online?: boolean;
 };
 
 export type PreviewBubble = {
@@ -15,48 +17,38 @@ export type PreviewBubble = {
 export const previewInbox: PreviewRow[] = [
   {
     id: "ada",
-    title: "Ada",
-    preview: "On my way — kettle’s on.",
+    title: "Ada Lovelace",
+    preview: "See you in five.",
+    time: "Just now",
     selected: true,
+    online: true,
   },
   {
-    id: "kitchen",
-    title: "Kitchen table",
-    preview: "Jules: Bring the good mugs.",
-    selected: false,
-  },
-  {
-    id: "jules",
-    title: "Jules",
-    preview: "Did you see Ada’s note?",
+    id: "design",
+    title: "Design Team Sync (3)",
+    preview: "Jules: Are we still on for 3?",
+    time: "11:20 AM",
     selected: false,
   },
 ];
 
-export const previewIncoming: PreviewBubble = {
-  id: "4",
-  text: "See you in five.",
-  time: "7:15 PM",
-  mine: false,
-};
-
 export const previewThread: PreviewBubble[] = [
   {
     id: "1",
-    text: "You home yet?",
-    time: "7:12 PM",
+    text: "Did you get a chance to look at my last note?",
+    time: "10:45 AM",
     mine: false,
   },
   {
     id: "2",
-    text: "Just walked in. Come over if you want tea.",
-    time: "7:13 PM",
+    text: "Yes — just walked in. I’ll send the notes in a minute.",
+    time: "10:46 AM",
     mine: true,
   },
   {
     id: "3",
-    text: "On my way — kettle’s on.",
-    time: "7:14 PM",
+    text: "Perfect. Send a line when you’re ready.",
+    time: "10:47 AM",
     mine: false,
   },
 ];

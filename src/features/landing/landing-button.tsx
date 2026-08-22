@@ -9,7 +9,7 @@ type LandingButtonProps = {
 };
 
 /**
- * Primary landing CTA. White label on `#C73E29` (AA). Hover uses link ink.
+ * Primary landing CTA. White label on primary fill.
  * @param props.href - Destination
  * @param props.children - Button label
  * @param props.className - Extra classes
@@ -20,7 +20,7 @@ export function LandingButton({ href, children, className }: LandingButtonProps)
     <Link
       href={href}
       className={cn(
-        "inline-flex h-11 items-center justify-center rounded-full bg-landing-button px-5 text-sm font-medium text-white transition-colors hover:bg-landing-link",
+        "inline-flex items-center justify-center rounded-full bg-landing-primary px-8 py-3.5 text-base font-medium text-landing-surface shadow-md shadow-landing-primary/20 transition-all hover:bg-landing-primary-hover",
         className,
       )}
     >
