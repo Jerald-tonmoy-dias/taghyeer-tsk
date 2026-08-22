@@ -50,9 +50,9 @@ The longer “why” is in [system design](docs/system-design.md). This is how I
 
 ### How I started
 
-I read the product notes and the Swagger page before I wrote any UI. Swagger listed the routes. It did not list response bodies or status codes. So I called every endpoint and socket event myself and wrote down what came back. Nothing in the docs is guessed.
+I read the product notes and the Swagger page before I wrote any UI. Swagger listed the routes. It did not list response bodies or status codes. I did not click every endpoint by hand. I listed the cases I wanted checked. In Cursor, a Python script hit the live REST API and saved the raw status and body for each case. A small Node script then checked the leftover cases, including a real socket.io round-trip. From that capture we wrote the [API reference](docs/api-doc.md). I then checked the responses myself and built a [Postman collection](docs/Chat-API.postman_collection.json). Nothing in the docs is guessed.
 
-From those notes I wrote the [API reference](docs/api-doc.md) and a [Postman collection](docs/Chat-API.postman_collection.json). Then I wrote a [system design](docs/system-design.md). That design changed while I built. I still used it as the map: data model, who owns state, how `/` and `/app` render, and how realtime should work.
+Then I wrote a [system design](docs/system-design.md). That design changed while I built. I still used it as the map: data model, who owns state, how `/` and `/app` render, and how realtime should work.
 
 Then I split the work into GitHub issues on a project board. The workflow was **issue → branch → PR → self-review → merge**. One issue, one branch, one PR. I reviewed each PR myself before merging. There was a lot of back and forth. The rule I kept: **core chat first** (login, inbox, thread, send, socket, scroll, groups), landing second.
 
@@ -94,7 +94,7 @@ I did not add a FAQ. Extra questions would have padded the page. The timed incom
 
 I used **Claude and Cursor** to talk through the idea and to build most of the app. I used **ChatGPT** when I needed a second pass on copy.
 
-They helped scaffold the project, build the typed API client, implement screens from specs I wrote, and turn probe notes into documentation. They did not invent endpoints.
+They helped scaffold the project, build the typed API client, and implement screens from specs I wrote. Cursor also ran the API probe scripts and drafted the API doc from those raw responses. I checked the captured responses before I treated them as the contract. They did not invent endpoints.
 
 What I changed or rejected:
 
