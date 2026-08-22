@@ -41,7 +41,7 @@ export function ThreadPanel({
 
   if (!conversationId) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+      <div className="flex h-full w-full flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
         <p className="font-landing-display text-lg font-medium text-landing-ink">
           Select a conversation
         </p>
