@@ -46,17 +46,21 @@ Open [http://localhost:3000](http://localhost:3000). Routes: `/` landing, `/logi
 
 ## Thought process
 
-The longer “why” is in [system design](docs/system-design.md). This is how I actually did the work.
+The longer “why” is in [system design](docs/system-design.md). This is what I did, and why.
 
 ### How I started
 
-I read the product notes and the Swagger page before I wrote any UI. Swagger listed the routes. It did not list response bodies or status codes. I did not click every endpoint by hand. I listed the cases I wanted checked. In Cursor, a Python script hit the live REST API and saved the raw status and body for each case. A small Node script then checked the leftover cases, including a real socket.io round-trip. From that capture we wrote the [API reference](docs/api-doc.md). I then checked the responses myself and built a [Postman collection](docs/Chat-API.postman_collection.json). Nothing in the docs is guessed.
+I read the product notes and the Swagger page first. I did not write any UI yet. Swagger listed the routes. It did not list response bodies or status codes.
 
-Then I wrote a [system design](docs/system-design.md). That design changed while I built. I still used it as the map: data model, who owns state, how `/` and `/app` render, and how realtime should work.
+I did not click every endpoint by hand. I listed the cases I wanted checked. In Cursor, a Python script hit the live REST API. It saved the raw status and body for each case. A small Node script then checked the leftover cases. That included a real socket.io round-trip.
+
+From that capture we wrote the [API reference](docs/api-doc.md). I then checked the responses myself. I also built a [Postman collection](docs/Chat-API.postman_collection.json). Nothing in the docs is guessed.
+
+Then I wrote a [system design](docs/system-design.md). That design changed while I built. I still used it as the map. It covers the data model, who owns state, how `/` and `/app` render, and how realtime should work.
 
 Then I split the work into GitHub issues on a project board. The workflow was **issue → branch → PR → self-review → merge**. One issue, one branch, one PR. I reviewed each PR myself before merging. There was a lot of back and forth. The rule I kept: **core chat first** (login, inbox, thread, send, socket, scroll, groups), landing second.
 
-I also wrote a [developer guide](docs/developer-guide.md) so the next person does not have to re-learn the API quirks from scratch.
+I also wrote a [developer guide](docs/developer-guide.md). That way the next person does not have to re-learn the API quirks from scratch.
 
 ### Architecture
 
@@ -66,7 +70,7 @@ REST and the socket return messages in different shapes. REST uses `_id` and an 
 
 **I never get my own message back on the socket.** So send is REST-first. The bubble comes from `POST /messages`. The socket is only for other people’s messages. If I had waited on the socket, my own line would never show up.
 
-The rest follows from that:
+Other choices:
 
 - **TanStack Query** holds server state. I did not add Redux or Zustand. There was nothing else to store besides cached API data and a little UI state (composer, stuck-to-bottom, which chat is open).
 - **No Zod.** I needed to reshape payloads (`_id` → `id`, `lastMessage: {}` → missing), not validate them. TypeScript covers the shape. A runtime parser would still need the same transforms.
@@ -81,9 +85,9 @@ I did not want a generic dashboard or a purple gradient. The landing tokens in `
 
 `/`, `/login`, and `/app` share those same color tokens and fonts. `/app` is not a separate Geist / default-shadcn theme. Geist is only the root fallback on `<html>`. Chat bubbles use Inter on top of the same product colors.
 
-A few concrete calls:
+What I put on the page:
 
-- **A chat mock under the hero**, so you see the room before you sign up. The thread is fake data. One extra line shows up after a short pause. That is CSS and a timer. There is no live socket on the public page.
+- **A chat mock under the hero.** You see the room before you sign up. The thread is fake data. One extra line shows up after a short pause. That is CSS and a timer. There is no live socket on the public page.
 - **One main button** (“Open the Chat App”) and a two-line title. The header stays simple.
 - **Three short cards** for what it does: search and start, 1:1 and groups, live messages. Not a long feature list.
 - **A details block** for the less visible bits: empty send is blocked, scroll does not yank you, and loading / empty / error are handled.
@@ -94,7 +98,7 @@ I did not add a FAQ. Extra questions would have padded the page. The timed incom
 
 I used **Claude and Cursor** to talk through the idea and to build most of the app. I used **ChatGPT** when I needed a second pass on copy.
 
-They helped scaffold the project, build the typed API client, and implement screens from specs I wrote. Cursor also ran the API probe scripts and drafted the API doc from those raw responses. I checked the captured responses before I treated them as the contract. They did not invent endpoints.
+They helped scaffold the project. They built the typed API client. They implemented screens from specs I wrote. Cursor also ran the API probe scripts and drafted the API doc from those raw responses. I checked the captured responses before I treated them as the contract. They did not invent endpoints.
 
 What I changed or rejected:
 
