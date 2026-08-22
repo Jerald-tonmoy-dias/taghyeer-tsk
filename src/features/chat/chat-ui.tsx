@@ -19,6 +19,33 @@ export function initials(name: string): string {
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
+const avatarTones = [
+  "bg-sky-100 text-sky-700",
+  "bg-violet-100 text-violet-700",
+  "bg-rose-100 text-rose-700",
+  "bg-amber-100 text-amber-800",
+  "bg-emerald-100 text-emerald-700",
+  "bg-teal-100 text-teal-700",
+  "bg-orange-100 text-orange-800",
+  "bg-indigo-100 text-indigo-700",
+  "bg-fuchsia-100 text-fuchsia-700",
+  "bg-cyan-100 text-cyan-700",
+] as const;
+
+/**
+ * Pick a light avatar tone from the display name. Same name → same color.
+ * @param name - Person or group name
+ * @returns string — background + text classes
+ */
+export function avatarTone(name: string): string {
+  const key = name.trim().toLowerCase();
+  let hash = 0;
+  for (const character of key) {
+    hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  }
+  return avatarTones[hash % avatarTones.length] ?? avatarTones[0];
+}
+
 type ChatAvatarProps = {
   name: string;
   size?: "sm" | "md";
@@ -41,7 +68,8 @@ export function ChatAvatar({
     <div className="relative shrink-0">
       <div
         className={cn(
-          "flex items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 font-bold text-white shadow-xs",
+          "flex items-center justify-center rounded-xl font-bold shadow-xs",
+          avatarTone(name),
           size === "md" ? "h-10 w-10 text-xs" : "h-8 w-8 text-[11px]",
         )}
       >

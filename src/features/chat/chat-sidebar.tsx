@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/auth-provider";
 import { ChatAvatar, ChatMark } from "@/features/chat/chat-ui";
@@ -41,12 +42,16 @@ export function ChatSidebar({ selectedId }: ChatSidebarProps) {
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-landing-surface">
       <header className="flex items-center justify-between border-b border-landing-border bg-slate-50/70 px-4 py-4">
-        <div className="flex items-center gap-2.5">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5"
+          aria-label="Back to home"
+        >
           <ChatMark />
           <span className="font-landing-display text-lg font-bold tracking-tight text-landing-ink">
             Taghyeer
           </span>
-        </div>
+        </Link>
       </header>
 
       <div className="space-y-2 border-b border-landing-border p-3">

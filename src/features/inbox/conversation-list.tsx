@@ -55,6 +55,7 @@ export function ConversationList({ selectedId, tab }: ConversationListProps) {
         ? conversation.type === "group"
         : conversation.type === "direct",
     ),
+    unreadIds,
   );
 
   if (rows.length === 0) {

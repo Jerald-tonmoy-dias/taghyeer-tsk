@@ -117,7 +117,7 @@ export function NewGroup({ onCreated }: NewGroupProps) {
             d="M12 4v16m8-8H4"
           />
         </svg>
-        Create Group (Min 3 Members)
+        Create Group (Min 2 Members)
       </button>
 
       <Dialog

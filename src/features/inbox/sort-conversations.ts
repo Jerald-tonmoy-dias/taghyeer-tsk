@@ -14,15 +14,21 @@ export function conversationActivityTime(conversation: Conversation): number {
 }
 
 /**
- * Newest activity first. Does not mutate the input.
+ * Unread chats first, then newest activity. Does not mutate the input.
  * @param conversations - Inbox rows for one tab
+ * @param unreadIds - Session unread conversation ids
  * @returns Conversation[]
  */
 export function sortConversationsByLatest(
   conversations: Conversation[],
+  unreadIds: ReadonlySet<string> = new Set(),
 ): Conversation[] {
-  return [...conversations].sort(
-    (left, right) =>
-      conversationActivityTime(right) - conversationActivityTime(left),
-  );
+  return [...conversations].sort((left, right) => {
+    const leftUnread = unreadIds.has(left.id) ? 1 : 0;
+    const rightUnread = unreadIds.has(right.id) ? 1 : 0;
+    if (leftUnread !== rightUnread) {
+      return rightUnread - leftUnread;
+    }
+    return conversationActivityTime(right) - conversationActivityTime(left);
+  });
 }

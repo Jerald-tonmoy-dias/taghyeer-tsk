@@ -56,32 +56,41 @@ export function SearchPeople({ onStarted }: SearchPeopleProps) {
 
   return (
     <div className="relative">
-      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-        <svg
-          className="h-3.5 w-3.5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setError(null);
+          }}
+          placeholder="Search users by name or phone..."
+          aria-label="Search people"
+          aria-describedby="people-search-hint"
+          className={cn(chatFieldClass, "py-1.5 pr-3 pl-9")}
+        />
       </div>
-      <input
-        type="search"
-        value={query}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setError(null);
-        }}
-        placeholder="Search users by name or phone..."
-        aria-label="Search people"
-        className={cn(chatFieldClass, "py-1.5 pr-3 pl-9")}
-      />
+      <p
+        id="people-search-hint"
+        className="mt-1.5 px-0.5 font-landing-mono text-[10px] leading-4 text-landing-muted-light"
+      >
+        Case-sensitive. Type the name as it was registered.
+      </p>
       {query.trim() ? (
         <SearchResults
           isPending={searchQuery.isPending}

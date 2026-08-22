@@ -71,17 +71,23 @@ function ConversationRowComponent({
             : "border-transparent hover:bg-slate-100/70",
       )}
     >
-      <ChatAvatar name={title} />
+      <div className="flex items-center gap-1.5">
+        <span className="flex w-1.5 shrink-0 justify-center">
+          {unread ? (
+            <span
+              className="h-1.5 w-1.5 rounded-full bg-landing-primary"
+              aria-label="Unread"
+            />
+          ) : null}
+        </span>
+        <ChatAvatar name={title} />
+      </div>
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex items-center justify-between gap-2">
-          <h4 className="flex min-w-0 items-center gap-1.5 truncate text-xs font-bold text-landing-ink">
-            {unread ? (
-              <span
-                className="h-1.5 w-1.5 shrink-0 rounded-full bg-landing-primary"
-                aria-label="Unread"
-              />
-            ) : null}
-            <span className="truncate">{title}</span>
+          <h4 className="flex min-w-0 items-center gap-1.5 truncate text-xs text-landing-ink">
+            <span className={cn("truncate", unread ? "font-bold" : "font-medium")}>
+              {title}
+            </span>
             {conversation.type === "group" ? (
               <span className="shrink-0 rounded border border-amber-200 bg-amber-50 px-1 font-landing-mono text-[9px] font-medium text-amber-700">
                 GROUP
