@@ -34,6 +34,36 @@ export function appendMessageToThread(
 }
 
 /**
+ * Prepend an older API page (newest-first) onto a thread shown oldest → newest.
+ * Duplicate ids are dropped. An empty or all-duplicate page stops further loads.
+ * @param thread - Cached thread, or undefined if none
+ * @param olderNewestFirst - Next page as the API returns it
+ * @param hasMore - `hasMore` from that page
+ * @returns MessageThread
+ */
+export function prependOlderPage(
+  thread: MessageThread | undefined,
+  olderNewestFirst: Message[],
+  hasMore: boolean,
+): MessageThread {
+  const older = [...olderNewestFirst].reverse();
+  if (!thread) {
+    return { messages: older, hasMore };
+  }
+
+  const seen = new Set(thread.messages.map((item) => item.id));
+  const unique = older.filter((item) => !seen.has(item.id));
+  if (unique.length === 0) {
+    return { ...thread, hasMore: false };
+  }
+
+  return {
+    messages: [...unique, ...thread.messages],
+    hasMore,
+  };
+}
+
+/**
  * Patch the matching inbox row’s last message after a send.
  * @param inbox - Cached conversation list
  * @param message - REST send response

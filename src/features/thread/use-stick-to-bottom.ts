@@ -8,6 +8,8 @@ type UseStickToBottomOptions = {
   messageCount: number;
   forceToken: number;
   viewportRef: RefObject<HTMLElement | null>;
+  /** When true, a higher message count is an older page — do not jump to latest. */
+  holdScrollRef?: RefObject<boolean>;
 };
 
 /**
@@ -17,6 +19,7 @@ type UseStickToBottomOptions = {
  * @param options.messageCount - Visible messages
  * @param options.forceToken - Bumped after send
  * @param options.viewportRef - Scrollable pane
+ * @param options.holdScrollRef - Set while prepending older history
  * @returns {{ onScroll: (event: UIEvent<HTMLElement>) => void }}
  */
 export function useStickToBottom({
@@ -24,6 +27,7 @@ export function useStickToBottom({
   messageCount,
   forceToken,
   viewportRef,
+  holdScrollRef,
 }: UseStickToBottomOptions): { onScroll: (event: UIEvent<HTMLElement>) => void } {
   const stuckRef = useRef(true);
   const prevIdRef = useRef(conversationId);
@@ -59,12 +63,14 @@ export function useStickToBottom({
     }
 
     const shouldScroll =
-      threadChanged || forced || (countIncreased && stuckRef.current);
+      threadChanged ||
+      forced ||
+      (countIncreased && stuckRef.current && !holdScrollRef?.current);
     if (shouldScroll) {
       scrollToLatest(viewport);
       stuckRef.current = true;
     }
-  }, [conversationId, forceToken, messageCount, viewportRef]);
+  }, [conversationId, forceToken, holdScrollRef, messageCount, viewportRef]);
 
   return { onScroll };
 }
