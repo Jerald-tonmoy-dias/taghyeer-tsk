@@ -114,6 +114,7 @@ Incoming realtime (`message:new`) is `lib/socket.ts`. Send stays REST.
 | Own send does not appear | Sender has no `message:new`; use the REST response |
 | Inbox `lastMessage` empty | API sends `{}` — mapper turns that into `undefined` |
 | Search misses a known name | Query must match the stored spelling and case (`Ada`, not `ada`) |
+| 1:1 with your own `userId` opens the wrong chat | API returns an existing unrelated conversation (`200`). Search and new-group exclude you (`person.id !== me.id`) |
 | `tsc` not found | Use `npm run typecheck`, not a global `tsc` |
 | Types missing `LayoutProps` | Run `npm run dev` once so Next generates `.next/types` |
 
