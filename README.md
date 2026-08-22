@@ -50,6 +50,8 @@ The longer “why” is in [system design](docs/system-design.md). This is what 
 
 ### How I started
 
+**I tracked the whole build as GitHub issues on a [project board](https://github.com/users/Jerald-tonmoy-dias/projects/5), one issue → one branch → one PR at a time — the full history is in the [closed issues](https://github.com/Jerald-tonmoy-dias/taghyeer-tsk/issues?q=is%3Aissue+is%3Aclosed).**
+
 I read the product notes and the Swagger page first. I did not write any UI yet. Swagger listed the routes. It did not list response bodies or status codes.
 
 I did not click every endpoint by hand. I listed the cases I wanted checked. In Cursor, a Python script hit the live REST API. It saved the raw status and body for each case. A small Node script then checked the leftover cases. That included a real socket.io round-trip.
@@ -58,7 +60,7 @@ From that capture we wrote the [API reference](docs/api-doc.md). I then checked 
 
 Then I wrote a [system design](docs/system-design.md). That design changed while I built. I still used it as the map. It covers the data model, who owns state, how `/` and `/app` render, and how realtime should work.
 
-Then I split the work into GitHub issues on a project board. The workflow was **issue → branch → PR → self-review → merge**. One issue, one branch, one PR. I reviewed each PR myself before merging. There was a lot of back and forth. The rule I kept: **core chat first** (login, inbox, thread, send, socket, scroll, groups), landing second.
+Then I split the work into issues and worked one at a time — branch, code, PR, review, merge. There was a lot of back and forth. The rule I kept: core chat first (login, inbox, thread, send, socket, scroll, groups), landing second.
 
 I also wrote a [developer guide](docs/developer-guide.md). That way the next person does not have to re-learn the API quirks from scratch.
 
