@@ -57,6 +57,7 @@ Written **before** implementation. The app consumes a REST + Socket.io backend w
 - Socket reconnect + connection indicator
 - Group rename / add / leave (API exists; polish after core chat)
 - Normalize REST `_id` vs socket `id` + ISO vs numeric `createdAt`
+- Sidebar sorted by latest activity; session-only unread highlight on inbox rows
 
 **Could** (after core is solid)
 
@@ -66,7 +67,8 @@ Written **before** implementation. The app consumes a REST + Socket.io backend w
 
 **Won’t (MVP)**
 
-- Offline-first sync, read receipts, typing indicators, file/image messages, push notifications, i18n, dark-mode-as-a-feature, virtualization of 10k messages, E2E suite, feature flags
+- Offline-first sync, **server** read receipts / persisted unread, typing indicators, file/image messages, push notifications, i18n, dark-mode-as-a-feature, virtualization of 10k messages, E2E suite, feature flags
+- Newest-first **thread** (composer stays at the bottom; only the sidebar sorts latest-first)
 
 ---
 
@@ -291,6 +293,7 @@ src/
 - Ignore if `senderId === me` (we already appended from REST).
 - Append if not duplicate (`id`).
 - Update inbox `lastMessage`.
+- If that thread is **not** the open `?c=`, mark the inbox row unread for this tab only.
 - If that thread is open and stuck-to-bottom → stay pinned; else increment “new” count.
 
 **Do not** put the message list in Zustand/Redux. Query cache is the server-state store.
@@ -399,6 +402,23 @@ Load older pages when the top of the list is visible and `hasMore` is true; prep
 
 ---
 
+## 9b. Inbox list (sidebar)
+
+The sidebar is a conversation index, not the thread. Direct and Groups stay separate tabs; **each tab** is sorted independently.
+
+**Sort (client):** `lastMessage.createdAt` descending, then `updatedAt` for empty threads. `GET /conversations` does not guarantee this order. Empty chats (rename-only groups, new rooms) sit below anything with a real last message.
+
+**Unread (client, this tab only):** The API has no read cursor, unread count, or receipt. We still highlight a row when `message:new` arrives and that conversation is not open:
+
+- Bold preview + a small primary dot (or stronger weight on the title)
+- Opening `?c=` for that id clears the mark
+- Own sends never count as unread
+- Reload or another browser starts clean — there is nothing to persist
+
+Do **not** claim the other person has unread mail, and do not invent a badge count we cannot prove after refresh.
+
+---
+
 ## 10. How the pieces connect
 
 Landing (`/`) is static. Login stores a JWT. `/app` is a client app: TanStack Query talks to REST; Socket.io only pushes `message:new` / `conversation:updated` into that same cache. The sender never waits on the socket — their bubble comes from the REST response.
@@ -417,10 +437,11 @@ Landing (`/`) is static. Login stores a JWT. `/app` is a client app: TanStack Qu
 | No Zod | Types + mappers already cover the API; form rules are a few `trim()` checks | No runtime schema on responses |
 | Client empty-message guard | API stores `""` | Must not “trust the backend” |
 | Skip group admin UI in v1 if time-tight | Chat panel ships first | Still **create** group + chat |
+| Client inbox sort + session unread | API list order is not latest-first; no read state exists | Unread is lost on reload; do not show a fake persisted count |
 
 Zod would not remove the mappers. REST and UI shapes differ (`_id` vs `id`, ISO date vs millisecond timestamp, empty `lastMessage: {}`), so a schema would still need the same transforms, plus more code than `type User = { … }` and a `trim()` on login/search/send. TypeScript is the contract; the live API is stable enough that parsing every payload at runtime is extra upkeep, not safety.
 
-**Deliberately not solved:** typing, receipts, offline queue, signed-cookie auth, `before` cursor correctness, newly-added member socket (not probed).
+**Deliberately not solved:** typing, **server** receipts / persisted unread, offline queue, signed-cookie auth, `before` cursor correctness, newly-added member socket (not probed).
 
 ---
 

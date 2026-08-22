@@ -32,7 +32,7 @@ Env (already filled in `.env.example`):
 
 - `/` — marketing landing (hero, preview, what it does, footer)
 - `/login` — phone + name (auto-register)
-- `/app` — inbox, search, groups, history, send, live incoming, stick-to-bottom scroll
+- `/app` — inbox (latest activity first; session unread on closed chats), search, groups, history, send, live incoming, stick-to-bottom scroll
 
 The live backend is REST + Socket.io. We do not own it. Documented in [api-doc.md](./api-doc.md) and [Chat-API.postman_collection.json](./Chat-API.postman_collection.json).
 
@@ -94,6 +94,8 @@ Incoming realtime (`message:new`) is `lib/socket.ts`. Send stays REST.
 - **Do not call** `GET /users/search` with an empty `q`.
 - **Search is exact and case-sensitive.** The API does not fold case or match partial words; `ada` and `Ada` can return different people.
 - **Do not send** whitespace-only messages (`sendMessage` already rejects them). The API would store `""`.
+- **Inbox sort is client-side.** Each sidebar tab is `lastMessage.createdAt` desc, then `updatedAt`. The API does not guarantee order.
+- **Unread is session-only.** Mark a row when `message:new` arrives and that chat is not open; clear on open. No server read state — do not persist a count.
 - **Do not send** a free-text phone. The API does not verify numbers; the login form only checks that the value is a number.
 - Names should be obvious in review (`payloads`, `toTimestampMs` — not `dto`, `epoch`).
 

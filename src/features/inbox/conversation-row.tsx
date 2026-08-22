@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 type ConversationRowProps = {
   conversation: Conversation;
   selected: boolean;
+  unread: boolean;
 };
 
 /**
@@ -43,11 +44,13 @@ function lastMessagePreview(
  * One inbox row. Direct chats show the other person; groups show the name.
  * @param props.conversation - Inbox item
  * @param props.selected - Whether this thread is open
+ * @param props.unread - Session unread from a live incoming message
  * @returns JSX.Element
  */
 function ConversationRowComponent({
   conversation,
   selected,
+  unread,
 }: ConversationRowProps) {
   const { user } = useAuth();
   const title = conversationTitle(conversation);
@@ -63,13 +66,21 @@ function ConversationRowComponent({
         "flex items-start gap-3 rounded-xl border p-3 transition-all",
         selected
           ? "border-landing-primary/20 bg-landing-primary-soft/80 shadow-xs"
-          : "border-transparent hover:bg-slate-100/70",
+          : unread
+            ? "border-transparent bg-landing-primary-soft/50 hover:bg-landing-primary-soft/70"
+            : "border-transparent hover:bg-slate-100/70",
       )}
     >
       <ChatAvatar name={title} />
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex items-center justify-between gap-2">
           <h4 className="flex min-w-0 items-center gap-1.5 truncate text-xs font-bold text-landing-ink">
+            {unread ? (
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-landing-primary"
+                aria-label="Unread"
+              />
+            ) : null}
             <span className="truncate">{title}</span>
             {conversation.type === "group" ? (
               <span className="shrink-0 rounded border border-amber-200 bg-amber-50 px-1 font-landing-mono text-[9px] font-medium text-amber-700">
@@ -81,7 +92,7 @@ function ConversationRowComponent({
             <span
               className={cn(
                 "shrink-0 font-landing-mono text-[10px]",
-                selected
+                selected || unread
                   ? "font-medium text-landing-primary"
                   : "text-landing-muted-light",
               )}
@@ -90,7 +101,16 @@ function ConversationRowComponent({
             </span>
           ) : null}
         </div>
-        <p className="truncate font-chat text-xs text-landing-muted">{preview}</p>
+        <p
+          className={cn(
+            "truncate font-chat text-xs",
+            unread
+              ? "font-semibold text-landing-ink"
+              : "text-landing-muted",
+          )}
+        >
+          {preview}
+        </p>
       </div>
     </Link>
   );

@@ -11,6 +11,10 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { applyConversationUpdated } from "@/features/chat/apply-conversation-updated";
 import { applyIncomingMessage } from "@/features/chat/apply-incoming-message";
+import {
+  clearAllUnread,
+  markConversationUnread,
+} from "@/features/inbox/unread-store";
 import { useAuth } from "@/features/auth/auth-provider";
 import type { ApiGroupConversation, SocketMessageNew } from "@/lib/api/payloads";
 import { mapGroupConversation, mapSocketMessage } from "@/lib/mappers";
@@ -66,6 +70,9 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     function onMessageNew(payload: SocketMessageNew) {
       const message = mapSocketMessage(payload);
       applyIncomingMessage(queryClient, message, myUserId);
+      if (message.senderId !== myUserId) {
+        markConversationUnread(message.conversationId);
+      }
     }
 
     /**
@@ -113,6 +120,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       setConnected(false);
+      clearAllUnread();
       disconnectSocket();
     };
   }, [queryClient, router, status, user]);
