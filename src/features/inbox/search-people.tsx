@@ -3,19 +3,25 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/auth-provider";
+import { chatFieldClass } from "@/features/chat/chat-ui";
 import { useDebouncedValue } from "@/features/inbox/use-debounced-value";
 import { createDirect } from "@/lib/api/conversations";
 import { isApiError } from "@/lib/api/error";
 import { searchUsers } from "@/lib/api/users";
 import type { User } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+type SearchPeopleProps = {
+  onStarted?: () => void;
+};
 
 /**
  * Search people and start a 1:1. Empty query never hits the API.
+ * @param props.onStarted - Switch the inbox to the Direct tab
  * @returns JSX.Element
  */
-export function SearchPeople() {
+export function SearchPeople({ onStarted }: SearchPeopleProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user: me } = useAuth();
@@ -34,6 +40,7 @@ export function SearchPeople() {
     onSuccess: async (created) => {
       setError(null);
       setQuery("");
+      onStarted?.();
       await queryClient.invalidateQueries({ queryKey: ["conversations"] });
       router.push(`/app?c=${created.id}`);
     },
@@ -48,16 +55,32 @@ export function SearchPeople() {
     searchQuery.data?.filter((person) => person.id !== me?.id) ?? [];
 
   return (
-    <div className="border-b px-3 py-2">
-      <Input
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+        <svg
+          className="h-3.5 w-3.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      </div>
+      <input
         type="search"
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);
           setError(null);
         }}
-        placeholder="Search name or phone"
+        placeholder="Search users by name or phone..."
         aria-label="Search people"
+        className={cn(chatFieldClass, "py-1.5 pr-3 pl-9")}
       />
       {query.trim() ? (
         <SearchResults
@@ -69,9 +92,7 @@ export function SearchPeople() {
           onRetry={() => void searchQuery.refetch()}
         />
       ) : null}
-      {error ? (
-        <p className="mt-2 text-xs text-destructive">{error}</p>
-      ) : null}
+      {error ? <p className="mt-2 text-xs text-rose-600">{error}</p> : null}
     </div>
   );
 }
@@ -99,14 +120,14 @@ function SearchResults({
   onRetry,
 }: SearchResultsProps) {
   if (isPending) {
-    return <p className="mt-2 text-xs text-muted-foreground">Searching…</p>;
+    return <p className="mt-2 text-xs text-landing-muted">Searching…</p>;
   }
 
   if (isError) {
     return (
       <button
         type="button"
-        className="mt-2 text-xs text-destructive underline"
+        className="mt-2 text-xs text-rose-600 underline"
         onClick={onRetry}
       >
         Search failed. Try again
@@ -115,13 +136,11 @@ function SearchResults({
   }
 
   if (results.length === 0) {
-    return (
-      <p className="mt-2 text-xs text-muted-foreground">No people found.</p>
-    );
+    return <p className="mt-2 text-xs text-landing-muted">No people found.</p>;
   }
 
   return (
-    <ul className="mt-2 max-h-48 overflow-y-auto rounded-md border">
+    <ul className="absolute z-20 mt-1.5 max-h-48 w-full overflow-y-auto rounded-xl border border-landing-border bg-landing-surface shadow-lg">
       {results.map((person) => {
         const starting = startingUserId === person.id;
         return (
@@ -130,13 +149,15 @@ function SearchResults({
               type="button"
               disabled={Boolean(startingUserId)}
               onClick={() => onSelect(person)}
-              className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-muted disabled:opacity-60"
+              className="flex w-full flex-col items-start px-3 py-2 text-left text-xs hover:bg-slate-50 disabled:opacity-60"
             >
-              <span className="font-medium">
+              <span className="font-medium text-landing-ink">
                 {person.name}
                 {starting ? " — opening…" : ""}
               </span>
-              <span className="text-xs text-muted-foreground">{person.phone}</span>
+              <span className="font-landing-mono text-[10px] text-landing-muted">
+                {person.phone}
+              </span>
             </button>
           </li>
         );

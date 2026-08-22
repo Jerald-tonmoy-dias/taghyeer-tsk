@@ -1,21 +1,21 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ConversationRow } from "@/features/inbox/conversation-row";
 import { listConversations } from "@/lib/api/conversations";
 
 type ConversationListProps = {
   selectedId: string | null;
+  tab: "direct" | "group";
 };
 
 /**
- * Live inbox of 1:1 and group conversations.
+ * Live inbox filtered to 1:1 or groups.
  * @param props.selectedId - Open conversation from `?c=`
+ * @param props.tab - Direct or group filter
  * @returns JSX.Element
  */
-export function ConversationList({ selectedId }: ConversationListProps) {
+export function ConversationList({ selectedId, tab }: ConversationListProps) {
   const inboxQuery = useQuery({
     queryKey: ["conversations"],
     queryFn: listConversations,
@@ -23,42 +23,48 @@ export function ConversationList({ selectedId }: ConversationListProps) {
 
   if (inboxQuery.isPending) {
     return (
-      <div className="flex flex-col gap-2 px-4 py-3">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
+      <div className="flex flex-col gap-2 px-2 py-3">
+        <div className="h-16 animate-pulse rounded-xl bg-slate-100" />
+        <div className="h-16 animate-pulse rounded-xl bg-slate-100" />
+        <div className="h-16 animate-pulse rounded-xl bg-slate-100" />
       </div>
     );
   }
 
   if (inboxQuery.isError) {
     return (
-      <div className="flex flex-col gap-2 px-4 py-6">
-        <p className="text-sm text-destructive">Could not load conversations.</p>
-        <Button
+      <div className="flex flex-col gap-2 px-3 py-6">
+        <p className="text-xs text-rose-600">Could not load conversations.</p>
+        <button
           type="button"
-          variant="outline"
-          size="sm"
-          className="w-fit"
+          className="w-fit text-xs font-semibold text-landing-primary hover:underline"
           onClick={() => void inboxQuery.refetch()}
         >
           Try again
-        </Button>
+        </button>
       </div>
     );
   }
 
-  if (inboxQuery.data.length === 0) {
+  const rows = inboxQuery.data.filter((conversation) =>
+    tab === "group"
+      ? conversation.type === "group"
+      : conversation.type === "direct",
+  );
+
+  if (rows.length === 0) {
     return (
-      <p className="px-4 py-6 text-sm text-muted-foreground">
-        No conversations yet. Search for someone to start a chat.
+      <p className="px-3 py-6 text-xs text-landing-muted">
+        {tab === "group"
+          ? "No groups yet. Create one with at least two other people."
+          : "No direct chats yet. Search for someone to start one."}
       </p>
     );
   }
 
   return (
-    <div>
-      {inboxQuery.data.map((conversation) => (
+    <div className="space-y-0.5">
+      {rows.map((conversation) => (
         <ConversationRow
           key={conversation.id}
           conversation={conversation}

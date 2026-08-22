@@ -1,23 +1,47 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { applyConversationUpdated } from "@/features/chat/apply-conversation-updated";
 import { applyIncomingMessage } from "@/features/chat/apply-incoming-message";
 import { useAuth } from "@/features/auth/auth-provider";
-import type { SocketMessageNew } from "@/lib/api/payloads";
-import { mapSocketMessage } from "@/lib/mappers";
+import type { ApiGroupConversation, SocketMessageNew } from "@/lib/api/payloads";
+import { mapGroupConversation, mapSocketMessage } from "@/lib/mappers";
 import { connectSocket, disconnectSocket } from "@/lib/socket";
 import { getToken } from "@/lib/api/token";
 
+type SocketStatus = {
+  connected: boolean;
+};
+
+const SocketStatusContext = createContext<SocketStatus>({ connected: false });
+
 /**
- * Listen for `message:new` while signed in on `/app`. Landing does not mount this.
+ * Whether this tab’s socket is up. Not other-user presence.
+ * @returns SocketStatus
+ */
+export function useSocketStatus(): SocketStatus {
+  return useContext(SocketStatusContext);
+}
+
+/**
+ * Listen for live messages and group updates while signed in on `/app`.
  * A socket drop does not log the user out.
  * @param props.children - Chat UI
  * @returns ReactNode
  */
 export function RealtimeProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { user, status } = useAuth();
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     if (status !== "authenticated" || !user) {
@@ -44,13 +68,58 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       applyIncomingMessage(queryClient, message, myUserId);
     }
 
+    /**
+     * Replace a group in the inbox. Leave the thread if we were removed.
+     * @param payload - Raw `conversation:updated` body
+     * @returns void
+     */
+    function onConversationUpdated(payload: ApiGroupConversation) {
+      const group = mapGroupConversation(payload);
+      const stillMember = group.participants.some(
+        (person) => person.id === myUserId,
+      );
+      applyConversationUpdated(queryClient, group, stillMember);
+      if (!stillMember && typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("c") === group.id) {
+          router.replace("/app");
+        }
+      }
+    }
+
+    function onConnect() {
+      setConnected(true);
+    }
+
+    function onDisconnect() {
+      setConnected(false);
+    }
+
     socket.on("message:new", onMessageNew);
+    socket.on("conversation:updated", onConversationUpdated);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    const connectedFrame = requestAnimationFrame(() => {
+      if (socket.connected) {
+        setConnected(true);
+      }
+    });
 
     return () => {
+      cancelAnimationFrame(connectedFrame);
       socket.off("message:new", onMessageNew);
+      socket.off("conversation:updated", onConversationUpdated);
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      setConnected(false);
       disconnectSocket();
     };
-  }, [queryClient, status, user]);
+  }, [queryClient, router, status, user]);
 
-  return children;
+  return (
+    <SocketStatusContext.Provider value={{ connected }}>
+      {children}
+    </SocketStatusContext.Provider>
+  );
 }
