@@ -26,7 +26,7 @@ type LandingShellProps = {
 };
 
 /**
- * Landing canvas, fonts, and selection. Used only on `/` so chat keeps Geist.
+ * Landing canvas, fonts, and selection. Used on `/` and `/login`.
  * @param props.children - Landing page
  * @returns JSX.Element
  */

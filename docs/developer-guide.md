@@ -30,7 +30,7 @@ Env (already filled in `.env.example`):
 
 ## What we are building
 
-- `/` — marketing landing (hero, preview, features, details, close, footer)
+- `/` — marketing landing (hero window, capabilities, spotlights, details, FAQ, closer)
 - `/login` — phone + name (auto-register)
 - `/app` — inbox (latest activity first; session unread on closed chats), search, groups, history, send, live incoming, stick-to-bottom scroll
 

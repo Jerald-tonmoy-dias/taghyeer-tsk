@@ -2,9 +2,12 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export const landingSections = [
-  { href: "#core-features", nav: "Core Capabilities", footer: "Capabilities" },
-  { href: "#demo", nav: "Conversations", footer: "Conversations" },
-  { href: "#engineering", nav: "Built for conversations", footer: "Details" },
+  { href: "#capabilities", nav: "Capabilities", footer: "Capabilities" },
+  { href: "#channels", nav: "Direct & groups", footer: "Conversations" },
+  { href: "#composer", nav: "Composer", footer: "Composer" },
+  { href: "#governance", nav: "Groups", footer: "Groups" },
+  { href: "#details", nav: "Details", footer: "Details" },
+  { href: "#faq", nav: "FAQ", footer: "FAQ" },
 ] as const;
 
 type LandingMarkProps = {
@@ -12,18 +15,16 @@ type LandingMarkProps = {
 };
 
 /**
- * Wordmark disc used in the nav and footer.
- * @param props.size - Disc size
+ * Wordmark tile used in the nav and footer.
+ * @param props.size - Tile size
  * @returns JSX.Element
  */
 export function LandingMark({ size = "md" }: LandingMarkProps) {
   return (
     <span
       className={cn(
-        "flex items-center justify-center rounded-full bg-landing-primary font-landing-sans font-bold text-landing-surface",
-        size === "md"
-          ? "h-8 w-8 text-sm shadow-sm shadow-landing-primary/20"
-          : "h-6 w-6 text-xs",
+        "flex items-center justify-center rounded-xl bg-landing-primary font-landing-sans font-bold text-landing-surface shadow-sm shadow-landing-primary/20",
+        size === "md" ? "h-8 w-8 text-xs" : "h-6 w-6 text-[10px]",
       )}
     >
       T
@@ -36,15 +37,16 @@ type LandingEyebrowProps = {
 };
 
 /**
- * Shared section label: small, uppercase, primary.
+ * Shared section pill: uppercase, mono, primary.
  * @param props.children - Label
  * @returns JSX.Element
  */
 export function LandingEyebrow({ children }: LandingEyebrowProps) {
   return (
-    <span className="text-xs font-semibold uppercase tracking-widest text-landing-primary">
+    <div className="inline-flex items-center gap-2 rounded-full border border-landing-primary/20 bg-landing-primary-soft px-3.5 py-1.5 font-landing-mono text-[11px] font-bold tracking-widest text-landing-primary uppercase">
+      <span className="h-1.5 w-1.5 rounded-full bg-landing-primary" />
       {children}
-    </span>
+    </div>
   );
 }
 
@@ -54,13 +56,9 @@ export function LandingEyebrow({ children }: LandingEyebrowProps) {
  */
 export function LandingCheckIcon() {
   return (
-    <svg className="h-4 w-4 text-landing-primary" fill="currentColor" viewBox="0 0 20 20">
-      <path
-        fillRule="evenodd"
-        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-        clipRule="evenodd"
-      />
-    </svg>
+    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-landing-primary-soft text-[10px] font-bold text-landing-primary">
+      ✓
+    </span>
   );
 }
 
@@ -78,5 +76,42 @@ export function LandingArrowIcon() {
         d="M14 5l7 7m0 0l-7 7m7-7H3"
       />
     </svg>
+  );
+}
+
+const avatarTint = {
+  indigo: "border-indigo-100 bg-indigo-50 text-indigo-700",
+  amber: "border-amber-100 bg-amber-50 text-amber-800",
+  emerald: "border-emerald-100 bg-emerald-50 text-emerald-800",
+} as const;
+
+type LandingAvatarProps = {
+  initials: string;
+  tint: keyof typeof avatarTint;
+  className?: string;
+};
+
+/**
+ * Pastel initials tile for landing mocks.
+ * @param props.initials - Two letters
+ * @param props.tint - Color set
+ * @param props.className - Extra classes
+ * @returns JSX.Element
+ */
+export function LandingAvatar({
+  initials,
+  tint,
+  className,
+}: LandingAvatarProps) {
+  return (
+    <div
+      className={cn(
+        "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-xs font-bold",
+        avatarTint[tint],
+        className,
+      )}
+    >
+      {initials}
+    </div>
   );
 }

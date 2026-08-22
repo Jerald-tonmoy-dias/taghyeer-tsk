@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { LandingAvatar } from "@/features/landing/landing-ui";
 import {
   previewInbox,
   previewThread,
@@ -9,10 +10,8 @@ import {
 } from "@/features/landing/preview-data";
 import { cn } from "@/lib/utils";
 
-const AUTO_REPLY = "Got it — that landed in the thread.";
+const AUTO_REPLY = "See you in five.";
 const REPLY_MS = 900;
-const FIELD_CLASS =
-  "rounded-xl border border-landing-border bg-landing-surface font-landing-sans text-xs text-landing-ink focus:border-landing-primary focus:outline-none";
 
 /**
  * Clock label for a mock send.
@@ -26,36 +25,33 @@ function formatPreviewTime() {
 }
 
 /**
- * One bubble in the mock thread.
+ * One bubble in the mock thread. Time sits in the corner.
  * @param props.bubble - Message
  * @returns JSX.Element
  */
 function BubbleRow({ bubble }: { bubble: PreviewBubble }) {
   return (
     <div
-      className={cn(
-        "flex flex-col",
-        bubble.mine ? "items-end" : "items-start",
-      )}
+      className={cn("flex flex-col", bubble.mine ? "items-end" : "items-start")}
     >
       <div
         className={cn(
-          "max-w-sm rounded-2xl px-4 py-2.5 text-sm",
+          "relative max-w-lg rounded-2xl px-4 pt-3 pb-2 text-[13px] leading-relaxed",
           bubble.mine
-            ? "rounded-tr-sm bg-landing-primary text-landing-surface shadow-xs shadow-landing-primary/10"
-            : "rounded-tl-sm border border-landing-border bg-landing-sand text-landing-ink",
+            ? "rounded-tr-sm bg-landing-primary text-landing-surface shadow-sm shadow-landing-primary/20"
+            : "rounded-tl-sm border border-landing-border bg-landing-surface text-landing-ink shadow-xs",
         )}
       >
-        {bubble.text}
+        <p className="pr-14">{bubble.text}</p>
+        <span
+          className={cn(
+            "absolute right-3 bottom-1.5 font-landing-mono text-[11px]",
+            bubble.mine ? "text-blue-100/90" : "text-landing-muted",
+          )}
+        >
+          {bubble.time}
+        </span>
       </div>
-      <span
-        className={cn(
-          "mt-1 text-[10px] text-landing-muted",
-          bubble.mine ? "mr-1" : "ml-1",
-        )}
-      >
-        {bubble.time}
-      </span>
     </div>
   );
 }
@@ -70,29 +66,38 @@ function InboxRow({ row, preview }: { row: PreviewRow; preview: string }) {
   return (
     <div
       className={cn(
-        "rounded-xl p-3",
+        "flex items-center gap-3.5 rounded-2xl p-3",
         row.selected
-          ? "border border-landing-primary/40 bg-landing-surface shadow-xs"
-          : "border border-transparent hover:bg-landing-surface/60",
+          ? "border border-landing-primary/30 bg-landing-primary-soft/80"
+          : "border border-transparent hover:bg-slate-50",
       )}
     >
-      <div className="flex items-center justify-between">
-        <span
-          className={cn(
-            "flex items-center gap-1.5 text-xs",
-            row.selected
-              ? "font-semibold text-landing-ink"
-              : "font-medium text-landing-ink/80",
-          )}
-        >
-          {row.online ? (
-            <span className="h-2 w-2 rounded-full bg-landing-primary" />
-          ) : null}
-          {row.title}
-        </span>
-        <span className="text-[10px] text-landing-muted">{row.time}</span>
+      <LandingAvatar initials={row.initials} tint={row.tint} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between text-xs">
+          <span
+            className={cn(
+              "truncate",
+              row.selected
+                ? "font-bold text-landing-ink"
+                : "font-semibold text-slate-800",
+            )}
+          >
+            {row.title}
+          </span>
+          <span
+            className={cn(
+              "shrink-0 font-landing-mono text-[11px]",
+              row.selected ? "font-medium text-landing-primary" : "text-slate-400",
+            )}
+          >
+            {row.time}
+          </span>
+        </div>
+        <p className="mt-0.5 truncate font-chat text-xs text-slate-500">
+          {preview}
+        </p>
       </div>
-      <p className="mt-1 truncate text-xs text-landing-muted">{preview}</p>
     </div>
   );
 }
@@ -123,6 +128,11 @@ export function PreviewSandbox() {
     };
   }, []);
 
+  /**
+   * Append the typed line, then a fake reply.
+   * @param event - Form submit
+   * @returns void
+   */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const next = text.trim();
@@ -155,83 +165,149 @@ export function PreviewSandbox() {
   }
 
   return (
-    <div className="grid min-h-[520px] grid-cols-1 overflow-hidden rounded-2xl border border-landing-border bg-landing-surface shadow-xl shadow-landing-ink/10 md:grid-cols-12">
-      <aside className="flex flex-col justify-between border-b border-landing-border bg-landing-cream p-4 md:col-span-4 md:border-b-0 md:border-r">
-        <div>
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Search number or name..."
-              className={cn("w-full px-3 py-2", FIELD_CLASS)}
-            />
-          </div>
-          <div className="flex items-center justify-between pb-2 text-[11px] font-semibold uppercase tracking-wider text-landing-muted">
-            <span>Conversations</span>
-            <span className="font-bold text-landing-primary">+ Group</span>
-          </div>
-          <div className="mt-2 space-y-1.5">
-            {previewInbox.map((row) => (
-              <InboxRow
-                key={row.id}
-                row={row}
-                preview={row.selected ? sidebarPreview : row.preview}
-              />
-            ))}
-          </div>
-        </div>
-        <div className="mt-4 flex items-center justify-between border-t border-landing-border pt-3 text-xs text-landing-muted">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-landing-primary font-landing-sans text-[10px] font-bold text-landing-surface">
-              U
+    <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-gradient-to-b from-slate-200/80 via-slate-100/40 to-slate-200/50 p-2.5 shadow-[0_40px_100px_-20px_rgba(15,23,42,0.12)] sm:rounded-[36px] sm:p-4">
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-landing-border/90 bg-landing-surface font-landing-sans shadow-xs sm:rounded-[28px]">
+        <div className="flex items-center justify-between border-b border-landing-border bg-landing-surface px-6 py-3.5">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2" aria-hidden>
+              <span className="h-3 w-3 rounded-full bg-[#FF5F56]" />
+              <span className="h-3 w-3 rounded-full bg-[#FFBD2E]" />
+              <span className="h-3 w-3 rounded-full bg-[#27C93F]" />
             </div>
-            <span className="font-medium text-landing-ink">+1 (555) 019-2831</span>
+            <span className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <span className="h-2.5 w-2.5 rounded-full bg-landing-primary" />
+              Taghyeer
+            </span>
           </div>
-          <span className="rounded-full border border-landing-primary/20 bg-landing-primary-soft px-2 py-0.5 text-[10px] font-medium text-landing-primary">
-            Signed in
-          </span>
-        </div>
-      </aside>
-      <section className="flex flex-col justify-between bg-landing-surface md:col-span-8">
-        <div className="flex items-center justify-between border-b border-landing-border bg-landing-sand-light/50 p-4">
-          <div>
-            <h3 className="font-landing-display text-base font-medium text-landing-ink">
-              Ada Lovelace
-            </h3>
-            <p className="text-[11px] text-landing-muted">
-              +1 (555) 392-8812 • Direct 1:1
-            </p>
+          <div className="flex items-center gap-3">
+            <span className="hidden font-landing-mono text-xs font-medium text-landing-muted sm:inline">
+              Preview
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 text-xs font-bold text-sky-700">
+              AL
+            </span>
           </div>
-          <span className="rounded-full bg-landing-sand px-2.5 py-1 font-landing-mono text-[11px] text-landing-muted">
-            Live
-          </span>
         </div>
-        <div
-          ref={scrollerRef}
-          className="max-h-[340px] flex-1 space-y-4 overflow-y-auto p-6"
-        >
-          {messages.map((bubble) => (
-            <BubbleRow key={bubble.id} bubble={bubble} />
-          ))}
+
+        <div className="flex h-[480px] flex-col overflow-hidden bg-landing-surface md:flex-row">
+          <aside className="flex w-full shrink-0 flex-col justify-between border-b border-landing-border md:w-80 md:border-r md:border-b-0">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="border-b border-landing-border/60 p-4">
+                <div className="flex items-center gap-2.5 rounded-xl border border-landing-border bg-slate-50 px-3.5 py-2 text-xs text-slate-400">
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  Search by name or phone
+                </div>
+              </div>
+              <div className="flex items-center gap-8 border-b border-landing-border/60 px-6 pt-3 pb-1 text-xs font-bold tracking-wider uppercase">
+                <span className="border-b-2 border-landing-primary pb-1.5 text-landing-primary">
+                  Direct (3)
+                </span>
+                <span className="pb-1.5 text-slate-400">Groups</span>
+              </div>
+              <div className="flex-1 space-y-1.5 overflow-y-auto p-3">
+                {previewInbox.map((row) => (
+                  <InboxRow
+                    key={row.id}
+                    row={row}
+                    preview={row.selected ? sidebarPreview : row.preview}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between border-t border-landing-border px-4 py-4 font-landing-mono text-xs text-slate-500">
+              <span>+15551234567</span>
+              <span className="flex items-center gap-1.5 font-landing-sans font-semibold text-emerald-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Signed in
+              </span>
+            </div>
+          </aside>
+
+          <section className="flex min-w-0 flex-1 flex-col justify-between bg-landing-surface p-6 font-chat">
+            <div className="-mx-6 -mt-6 flex items-center justify-between border-b border-landing-border bg-landing-surface px-6 pt-4 pb-4">
+              <div className="flex items-center gap-3.5">
+                <LandingAvatar initials="GH" tint="indigo" />
+                <div>
+                  <h3 className="font-landing-sans text-sm font-bold text-slate-900">
+                    Grace Hopper
+                  </h3>
+                  <p className="font-landing-mono text-xs text-slate-400">
+                    +15554313361 · Direct
+                  </p>
+                </div>
+              </div>
+              <span className="rounded-full border border-landing-border bg-landing-sand px-3 py-1 font-landing-mono text-xs text-landing-muted">
+                Preview
+              </span>
+            </div>
+
+            <div
+              ref={scrollerRef}
+              className="mx-auto my-auto w-full max-w-2xl space-y-4 overflow-y-auto py-4"
+            >
+              <div className="flex items-center justify-center">
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1 font-landing-mono text-xs text-slate-400">
+                  Today
+                </span>
+              </div>
+              {messages.map((bubble) => (
+                <BubbleRow key={bubble.id} bubble={bubble} />
+              ))}
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="mx-auto flex w-full max-w-2xl items-center justify-between rounded-2xl border border-slate-200 bg-landing-surface p-2.5 shadow-sm"
+            >
+              <input
+                type="text"
+                value={text}
+                onChange={(event) => setText(event.target.value)}
+                placeholder="Message Grace Hopper…"
+                aria-label="Write a preview message"
+                className="min-w-0 flex-1 bg-transparent px-3 text-xs text-landing-ink placeholder:text-slate-400 focus:outline-none"
+              />
+              <div className="flex items-center gap-3">
+                <span className="hidden font-landing-mono text-xs text-slate-400 sm:inline">
+                  Enter to send
+                </span>
+                <button
+                  type="submit"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl bg-landing-primary text-landing-surface shadow-xs disabled:opacity-40"
+                  disabled={!text.trim()}
+                  aria-label="Send"
+                >
+                  <svg
+                    className="h-4 w-4 translate-x-0.5 -translate-y-0.5 rotate-45"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </section>
         </div>
-        <form
-          onSubmit={handleSubmit}
-          className="flex items-center gap-3 border-t border-landing-border bg-landing-sand-light/50 p-4"
-        >
-          <input
-            type="text"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            placeholder="Write a message"
-            className={cn("flex-1 px-4 py-2.5", FIELD_CLASS)}
-          />
-          <button
-            type="submit"
-            className="rounded-xl bg-landing-primary px-5 py-2.5 font-landing-sans text-xs font-medium text-landing-surface shadow-xs shadow-landing-primary/20 transition-colors hover:bg-landing-primary-hover"
-          >
-            Send
-          </button>
-        </form>
-      </section>
+      </div>
     </div>
   );
 }

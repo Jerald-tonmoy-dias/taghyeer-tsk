@@ -1,14 +1,15 @@
 import { LandingClose } from "@/features/landing/landing-close";
 import { LandingEngineering } from "@/features/landing/landing-engineering";
+import { LandingFaq } from "@/features/landing/landing-faq";
 import { LandingFeatures } from "@/features/landing/landing-features";
 import { LandingFooter } from "@/features/landing/landing-footer";
 import { LandingHero } from "@/features/landing/landing-hero";
 import { LandingNav } from "@/features/landing/landing-nav";
 import { LandingShell } from "@/features/landing/landing-shell";
-import { ProductPreview } from "@/features/landing/product-preview";
+import { LandingSpotlights } from "@/features/landing/landing-spotlights";
 
 /**
- * Marketing home matching the supplied landing mock.
+ * Marketing home from the final landing redesign.
  * @returns JSX.Element
  */
 export default function HomePage() {
@@ -17,9 +18,10 @@ export default function HomePage() {
       <LandingNav />
       <main>
         <LandingHero />
-        <ProductPreview />
         <LandingFeatures />
+        <LandingSpotlights />
         <LandingEngineering />
+        <LandingFaq />
         <LandingClose />
       </main>
       <LandingFooter />
