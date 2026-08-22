@@ -81,16 +81,9 @@ export function SearchPeople({ onStarted }: SearchPeopleProps) {
           }}
           placeholder="Search users by name or phone..."
           aria-label="Search people"
-          aria-describedby="people-search-hint"
           className={cn(chatFieldClass, "py-1.5 pr-3 pl-9")}
         />
       </div>
-      <p
-        id="people-search-hint"
-        className="mt-1.5 px-0.5 font-landing-mono text-[10px] leading-4 text-landing-muted-light"
-      >
-        Case-sensitive. Type the name as it was registered.
-      </p>
       {query.trim() ? (
         <SearchResults
           isPending={searchQuery.isPending}
