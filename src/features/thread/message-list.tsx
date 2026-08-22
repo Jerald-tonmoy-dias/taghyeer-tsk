@@ -13,6 +13,10 @@ import {
   messageQueryKey,
   type MessageThread,
 } from "@/features/thread/message-cache";
+import {
+  MESSAGE_PAGE_SIZE,
+  useLoadOlder,
+} from "@/features/thread/use-load-older";
 import { useStickToBottom } from "@/features/thread/use-stick-to-bottom";
 import { getMessages } from "@/lib/api/conversations";
 import type { Conversation } from "@/lib/types";
@@ -26,6 +30,7 @@ type MessageListProps = {
 /**
  * Load a thread’s latest page and render oldest → newest.
  * Stays pinned to the latest message unless the user scrolls up.
+ * Older pages load when the top sentinel is visible.
  * @param props.conversationId - Open conversation
  * @param props.conversation - Inbox row, used for group sender names
  * @param props.scrollToken - Incremented after send to jump to the latest
@@ -38,10 +43,13 @@ export function MessageList({
 }: MessageListProps) {
   const { user } = useAuth();
   const viewportRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const messagesQuery = useQuery({
     queryKey: messageQueryKey(conversationId),
     queryFn: async (): Promise<MessageThread> => {
-      const page = await getMessages(conversationId, { limit: 30 });
+      const page = await getMessages(conversationId, {
+        limit: MESSAGE_PAGE_SIZE,
+      });
       return {
         messages: [...page.messages].reverse(),
         hasMore: page.hasMore,
@@ -49,12 +57,27 @@ export function MessageList({
     },
   });
 
-  const messageCount = messagesQuery.data?.messages.length ?? 0;
+  const messages = messagesQuery.data?.messages ?? [];
+  const messageCount = messages.length;
+  const hasMore = messagesQuery.data?.hasMore ?? false;
+  const oldestId = messages[0]?.id;
+
+  const { isLoadingOlder, olderError, holdScrollRef, retryOlder } =
+    useLoadOlder({
+      conversationId,
+      hasMore,
+      oldestId,
+      messageCount,
+      viewportRef,
+      sentinelRef,
+    });
+
   const { onScroll } = useStickToBottom({
     conversationId,
     messageCount,
     forceToken: scrollToken,
     viewportRef,
+    holdScrollRef,
   });
 
   if (messagesQuery.isPending) {
@@ -82,7 +105,7 @@ export function MessageList({
     );
   }
 
-  if (messagesQuery.data.messages.length === 0) {
+  if (messages.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center px-6 text-center">
         <p className="text-sm text-landing-muted">No messages yet.</p>
@@ -90,14 +113,29 @@ export function MessageList({
     );
   }
 
-  const messages = messagesQuery.data.messages;
-
   return (
     <div
       ref={viewportRef}
       onScroll={onScroll}
       className="min-h-0 flex-1 overflow-y-auto px-6 py-6"
     >
+      <div
+        ref={sentinelRef}
+        className="flex min-h-1 justify-center py-1"
+        aria-hidden={!hasMore && !isLoadingOlder && !olderError}
+      >
+        {isLoadingOlder ? (
+          <p className="text-[11px] text-landing-muted">Loading older…</p>
+        ) : olderError ? (
+          <button
+            type="button"
+            className="text-[11px] font-semibold text-rose-600 hover:underline"
+            onClick={retryOlder}
+          >
+            {olderError} Try again
+          </button>
+        ) : null}
+      </div>
       <div className="flex flex-col gap-3.5">
         {messages.map((message, index) => {
           const isMine = message.senderId === user?.id;

@@ -158,12 +158,13 @@ export function ThreadPanel({
         </button>
       </header>
       <MessageList
+        key={`messages-${conversationId}`}
         conversationId={conversationId}
         conversation={conversation}
         scrollToken={scrollToken}
       />
       <Composer
-        key={conversationId}
+        key={`composer-${conversationId}`}
         conversationId={conversationId}
         placeholder={
           isGroup ? `Message #${title}...` : `Message ${title}...`
